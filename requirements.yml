@@ -1,0 +1,3 @@
+- src: mkaag.coreos-timezone
+  name: coreos_timezone
+  version: v0.1.2
