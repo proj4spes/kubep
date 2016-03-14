@@ -1,0 +1,60 @@
+# config
+- name: create kubernetes config dirs
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  with_items:
+    - /srv/kubernetes/manifests
+    - /etc/kubernetes/manifests
+  become: yes
+  tags:
+    - kubernetes
+
+# kubelet-wrapper is only available on CoreOS 962.0.0+ so we make sure its here
+# to ensure backwards compatability.
+# See https://coreos.com/kubernetes/docs/latest/kubelet-wrapper.html
+- name: download kubelet-wrapper
+  become: yes
+  get_url:
+    url: "{{ k8s_kubelet_wrapper }}"
+    dest: /opt/bin/kubelet-wrapper
+    mode: 0775
+  tags:
+    - kubernetes
+
+# worker
+- name: deploy k8s-worker manifests
+  become: yes
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - src: worker-kubeconfig.yaml.j2
+      dest: /etc/kubernetes/manifests/worker-kubeconfig.yaml
+    - src: kube-proxy.yaml.j2
+      dest: /etc/kubernetes/manifests/kube-proxy.yaml
+  notify:
+    - restart kubelet
+  tags:
+    - k8s-worker
+
+- name: deploy kubelet service
+  become: yes
+  template:
+    src: kubelet.service.j2
+    dest: /etc/systemd/system/kubelet.service
+  notify:
+    - reload systemd
+    - restart kubelet
+  tags:
+    - k8s-worker
+
+- name: ensure kubelet is running
+  become: yes
+  service:
+    name: kubelet
+    state: started
+    enabled: yes
+  tags:
+    - k8s-worker
