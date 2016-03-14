@@ -1,7 +1,7 @@
 version: '2'
 services:
   etcd:
-    image: gcr.io/google_containers/etcd:2.0.13
+    image: gcr.io/google_containers/etcd:2.0.12
     container_name: etcd
     command: ['/usr/local/bin/etcd', '--bind-addr=0.0.0.0:4001', '--data-dir=/var/etcd/data']
 
