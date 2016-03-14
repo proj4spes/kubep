@@ -11,6 +11,41 @@ coreos:
   locksmith:
     endpoint: "http://localhost:2379"
   units:
+    - name: setup-network-environment.service
+      command: start
+      content: |
+        [Unit]
+        Description=Setup Network Environment
+        Documentation=https://github.com/kelseyhightower/setup-network-environment
+        Requires=network-online.target
+        After=network-online.target
+
+        [Service]
+        ExecStartPre=-/usr/bin/mkdir -p /opt/bin
+        ExecStartPre=/usr/bin/curl -L -o /opt/bin/setup-network-environment -z /opt/bin/setup-network-environment https://github.com/kelseyhightower/setup-network-environment/releases/download/v1.0.0/setup-network-environment
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/setup-network-environment
+        ExecStart=/opt/bin/setup-network-environment
+        RemainAfterExit=yes
+        Type=oneshot
+    - name: flanneld.service
+      command: start
+      drop-ins:
+        - name: 50-network-config.conf
+          content: |
+            [Unit]
+            Requires=etcd2.service
+            [Service]
+            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{"Network": "10.2.0.0/16", "Backend": {"Type": "vxlan"}}'
+    - name: docker.service
+      command: start
+      drop-ins:
+        - name: 60-wait-for-flannel-config.conf
+          content: |
+            [Unit]
+            After=flanneld.service
+            Requires=flanneld.service
+            Restart=always
+            Restart=on-failure
     - name: etcd2.service
       command: start
   update:
@@ -35,5 +70,14 @@ write_files:
   - path: /etc/ssl/etcd/private/etcd.pem
     permissions: 0644
     content: "${etcd_key}"
+  - path: /etc/kubernetes/ssl/worker.pem
+    permissions: 0644
+    content: "${worker_cert}"
+  - path: /etc/kubernetes/ssl/worker-key.pem
+    permissions: 0600
+    content: "${worker_key}"
+  - path: /etc/kubernetes/ssl/ca.pem
+    permissions: 0644
+    content: "${kubernetes_ca}"
 manage_etc_hosts: localhost
 role: workers
