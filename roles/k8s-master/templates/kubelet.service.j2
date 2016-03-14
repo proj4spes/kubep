@@ -13,7 +13,7 @@ ExecStart=/opt/bin/kubelet-wrapper \
   --register-node=false \
   --allow-privileged=true \
   --config=/etc/kubernetes/manifests \
-  --hostname-override=${COREOS_PUBLIC_IPV4} \
+  --hostname-override={{ inventory_hostname }} \
   --cluster_dns={{ k8s_dns_service_ip }} \
   --cluster_domain=cluster.local
 

@@ -11,7 +11,7 @@ variable "etcd_discovery_url_file" { default = "etcd_discovery_url.txt" }
   kubelet wrapper script.
   See https://coreos.com/kubernetes/docs/latest/kubelet-wrapper.html
 */
-variable "coreos_image" { default = "coreos-beta" }
+variable "coreos_image" { default = "coreos-alpha" }
 
 # Provider
 provider "digitalocean" {

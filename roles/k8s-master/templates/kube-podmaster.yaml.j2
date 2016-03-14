@@ -12,7 +12,7 @@ spec:
     - /podmaster
     - --etcd-servers={{ k8s_etcd_servers }}
     - --key=scheduler
-    - --whoami=${COREOS_PUBLIC_IPV4}
+    - --whoami={{ ansible_default_ipv4.address }}
     - --source-file=/src/manifests/kube-scheduler.yaml
     - --dest-file=/dst/manifests/kube-scheduler.yaml
     volumeMounts:
@@ -25,9 +25,9 @@ spec:
     image: gcr.io/google_containers/podmaster:1.1
     command:
     - /podmaster
-    - --etcd-servers=http://127.0.0.1:4001
+    - --etcd-servers={{ k8s_etcd_servers }}
     - --key=controller
-    - --whoami=${COREOS_PUBLIC_IPV4}
+    - --whoami={{ ansible_default_ipv4.address }}
     - --source-file=/src/manifests/kube-controller-manager.yaml
     - --dest-file=/dst/manifests/kube-controller-manager.yaml
     terminationMessagePath: /dev/termination-log

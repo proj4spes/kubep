@@ -7,3 +7,4 @@ proxy_env:
 
 coreos_timezone: 'Europe/London'
 etcd_servers_group: etcd_servers
+api_servers_group: masters

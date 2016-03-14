@@ -24,21 +24,6 @@
     - kubernetes
 
 # worker
-- name: deploy k8s-worker manifests
-  become: yes
-  template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-  with_items:
-    - src: worker-kubeconfig.yaml.j2
-      dest: /etc/kubernetes/manifests/worker-kubeconfig.yaml
-    - src: kube-proxy.yaml.j2
-      dest: /etc/kubernetes/manifests/kube-proxy.yaml
-  notify:
-    - restart kubelet
-  tags:
-    - k8s-worker
-
 - name: deploy kubelet service
   become: yes
   template:
@@ -56,5 +41,18 @@
     name: kubelet
     state: started
     enabled: yes
+  tags:
+    - k8s-worker
+
+- name: deploy k8s-worker manifests
+  become: yes
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - src: worker-kubeconfig.yaml.j2
+      dest: /etc/kubernetes/manifests/worker-kubeconfig.yaml
+    - src: kube-proxy.yaml.j2
+      dest: /etc/kubernetes/manifests/kube-proxy.yaml
   tags:
     - k8s-worker
