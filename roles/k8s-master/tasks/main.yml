@@ -1,6 +1,4 @@
 # config
-- debug: msg="etcd servers {{ k8s_etcd_servers }}"
-
 - name: create kubernetes config dirs
   file:
     path: "{{ item }}"
