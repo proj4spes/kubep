@@ -4,7 +4,6 @@
   environment: "{{ proxy_env }}"
   roles:
     - coreos_timezone
-  environment: "{{ proxy_env }}"
 
 - name: Install docker-py
   hosts: all:!role=bastion

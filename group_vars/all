@@ -6,3 +6,4 @@ proxy_env:
   HTTPS_PROXY: "{{ http_proxy }}"
 
 coreos_timezone: 'Europe/London'
+etcd_servers_group: etcd_servers
