@@ -33,6 +33,9 @@ spec:
       hostPort: 8080
       name: local
     volumeMounts:
+    - mountPath: {{ kubernetes_users_dir }}
+      name: basic-auth-kubernetes
+      readOnly: true
     - mountPath: {{ kubernetes_cert_dir }}
       name: ssl-certs-kubernetes
       readOnly: true
@@ -40,6 +43,9 @@ spec:
       name: ssl-certs-host
       readOnly: true
   volumes:
+  - hostPath:
+      path: {{ kubernetes_users_dir }}
+    name: basic-auth-kubernetes
   - hostPath:
       path: {{ kubernetes_cert_dir }}
     name: ssl-certs-kubernetes
