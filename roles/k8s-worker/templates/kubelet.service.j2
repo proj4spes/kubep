@@ -18,6 +18,7 @@ ExecStart=/opt/bin/kubelet-wrapper \
   --kubeconfig={{ kubernetes_config_dir }}/worker-kubeconfig.yaml \
   --tls-cert-file={{ kubernetes_cert_dir }}/worker.pem \
   --tls-private-key-file={{ kubernetes_cert_dir }}/worker-key.pem
+  --v={{ kubernetes_log_level }}
 
 [Install]
 WantedBy=multi-user.target

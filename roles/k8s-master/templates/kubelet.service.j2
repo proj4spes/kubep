@@ -16,6 +16,7 @@ ExecStart=/opt/bin/kubelet-wrapper \
   --hostname-override={{ inventory_hostname }} \
   --cluster_dns={{ kubernetes_dns_service_ip }} \
   --cluster_domain=cluster.local
+  --v={{ kubernetes_log_level }}
 
 [Install]
 WantedBy=multi-user.target

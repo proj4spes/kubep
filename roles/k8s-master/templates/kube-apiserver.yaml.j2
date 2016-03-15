@@ -24,6 +24,7 @@ spec:
     - --service-account-key-file={{ kubernetes_cert_dir }}/apiserver-key.pem
     - --basic-auth-file={{ kubernetes_users_dir }}/known_users.csv
     - --runtime-config=extensions/v1beta1/deployments=true,extensions/v1beta1/daemonsets=true
+    - --v={{ kubernetes_log_level }}
     ports:
     - containerPort: 443
       hostPort: 443
