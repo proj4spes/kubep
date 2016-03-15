@@ -7,22 +7,22 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-proxy
-    image: "quay.io/coreos/hyperkube:{{ k8s_version }}"
+    image: "quay.io/coreos/hyperkube:{{ kubernetes_version }}"
     command:
     - /hyperkube
     - proxy
-    - --master=http://{{ k8s_master }}:8080
-    - --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml
+    - --master={{ k8s_master }}
+    - --kubeconfig={{ kubernetes_config_dir }}/worker-kubeconfig.yaml
     - --proxy-mode=iptables
     securityContext:
       privileged: true
     volumeMounts:
       - mountPath: /etc/ssl/certs
         name: "ssl-certs"
-      - mountPath: /etc/kubernetes/worker-kubeconfig.yaml
+      - mountPath: {{ kubernetes_config_dir }}/worker-kubeconfig.yaml
         name: "kubeconfig"
         readOnly: true
-      - mountPath: /etc/kubernetes/ssl
+      - mountPath: {{ kubernetes_cert_dir }}
         name: "etc-kube-ssl"
         readOnly: true
   volumes:
@@ -31,7 +31,7 @@ spec:
         path: "/usr/share/ca-certificates"
     - name: "kubeconfig"
       hostPath:
-        path: "/etc/kubernetes/worker-kubeconfig.yaml"
+        path: "{{ kubernetes_config_dir }}/worker-kubeconfig.yaml"
     - name: "etc-kube-ssl"
       hostPath:
-        path: "/etc/kubernetes/ssl"
+        path: "{{ kubernetes_cert_dir }}"

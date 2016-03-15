@@ -7,21 +7,22 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-apiserver
-    image: quay.io/coreos/hyperkube:{{ k8s_version }}
+    image: quay.io/coreos/hyperkube:{{ kubernetes_version }}
     command:
     - /hyperkube
     - apiserver
     - --bind-address=0.0.0.0
     - --etcd-servers={{ k8s_etcd_servers }}
     - --allow-privileged=true
-    - --service-cluster-ip-range={{ k8s_service_ip_range }}
+    - --service-cluster-ip-range={{ kubernetes_service_ip_range }}
     - --secure-port=443
     - --advertise-address={{ ansible_default_ipv4.address }}
     - --admission-control=NamespaceLifecycle,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
-    - --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem
-    - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
-    - --client-ca-file=/etc/kubernetes/ssl/ca.pem
-    - --service-account-key-file=/etc/kubernetes/ssl/apiserver-key.pem
+    - --tls-cert-file={{ kubernetes_cert_dir }}/apiserver.pem
+    - --tls-private-key-file={{ kubernetes_cert_dir }}/apiserver-key.pem
+    - --client-ca-file={{ kubernetes_cert_dir }}/ca.pem
+    - --service-account-key-file={{ kubernetes_cert_dir }}/apiserver-key.pem
+    - --basic-auth-file={{ kubernetes_users_dir }}/known_users.csv
     - --runtime-config=extensions/v1beta1/deployments=true,extensions/v1beta1/daemonsets=true
     ports:
     - containerPort: 443
@@ -31,7 +32,7 @@ spec:
       hostPort: 8080
       name: local
     volumeMounts:
-    - mountPath: /etc/kubernetes/ssl
+    - mountPath: {{ kubernetes_cert_dir }}
       name: ssl-certs-kubernetes
       readOnly: true
     - mountPath: /etc/ssl/certs
@@ -39,7 +40,7 @@ spec:
       readOnly: true
   volumes:
   - hostPath:
-      path: /etc/kubernetes/ssl
+      path: {{ kubernetes_cert_dir }}
     name: ssl-certs-kubernetes
   - hostPath:
       path: /usr/share/ca-certificates

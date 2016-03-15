@@ -1,8 +1,5 @@
 ---
 # defaults file for k8s-worker
-k8s_version: v1.1.8_coreos.0
-k8s_dns_service_ip: 10.3.0.10
-k8s_kubelet_wrapper: https://raw.githubusercontent.com/coreos/coreos-overlay/master/app-admin/kubelet-wrapper/files/kubelet-wrapper
 k8s_api_servers: "{% for host in groups[api_servers_group] %}https://{{ hostvars[host].ansible_default_ipv4.address }}{% if not loop.last %},{% endif %}{% endfor %}"
 # @todo this should be a load balancer not a single master.
-k8s_master: "{{ hostvars[groups[api_servers_group][0]].ansible_default_ipv4.address }}"
+k8s_master: "http://{{ hostvars[groups[api_servers_group][0]].ansible_default_ipv4.address }}:8080"

@@ -1,15 +1,15 @@
-# config
-- name: create kubernetes config dirs
+- name: create kubernetes dirs
   file:
     path: "{{ item }}"
     state: directory
     mode: 0755
   with_items:
-    - /srv/kubernetes/manifests
-    - /etc/kubernetes/manifests
+    - "{{ kubernetes_config_dir }}"
+    - "{{ kubernetes_script_dir }}"
+    - "{{ kubernetes_podmaster_dir }}"
   become: yes
   tags:
-    - kubernetes
+    - k8s-master
 
 # kubelet-wrapper is only available on CoreOS 962.0.0+ so we make sure its here
 # to ensure backwards compatability.
@@ -17,11 +17,23 @@
 - name: download kubelet-wrapper
   become: yes
   get_url:
-    url: "{{ k8s_kubelet_wrapper }}"
+    url: "{{ kubernetes_kubelet_wrapper }}"
     dest: /opt/bin/kubelet-wrapper
     mode: 0775
   tags:
-    - kubernetes
+    - k8s-master
+
+- name: create service account users
+  become: yes
+  lineinfile:
+    dest: "{{ kubernetes_users_dir }}/known_users.csv"
+    create: yes
+    line: '{{ item.value.pass }},{{ item.key }},{{ item.value.role }}'
+  with_dict: "{{ k8s_users }}"
+  notify:
+    - restart kubelet
+  tags:
+    - k8s-master
 
 # master
 - name: deploy kubelet service
@@ -51,15 +63,15 @@
     dest: "{{ item.dest }}"
   with_items:
     - src: kube-proxy.yaml.j2
-      dest: /etc/kubernetes/manifests/kube-proxy.yaml
+      dest: "{{ kubernetes_manifest_dir }}/kube-proxy.yaml"
     - src: kube-apiserver.yaml.j2
-      dest: /etc/kubernetes/manifests/kube-apiserver.yaml
+      dest: "{{ kubernetes_manifest_dir }}/kube-apiserver.yaml"
     - src: kube-podmaster.yaml.j2
-      dest: /etc/kubernetes/manifests/kube-podmaster.yaml
+      dest: "{{ kubernetes_manifest_dir }}/kube-podmaster.yaml"
     - src: kube-controller-manager.yaml.j2
-      dest: /srv/kubernetes/manifests/kube-controller-manager.yaml
+      dest: "{{ kubernetes_podmaster_dir }}/kube-controller-manager.yaml"
     - src: kube-scheduler.yaml.j2
-      dest: /srv/kubernetes/manifests/kube-scheduler.yaml
+      dest: "{{ kubernetes_podmaster_dir }}/kube-scheduler.yaml"
   tags:
     - k8s-master
 

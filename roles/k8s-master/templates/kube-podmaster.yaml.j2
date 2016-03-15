@@ -39,8 +39,8 @@ spec:
       name: manifests
   volumes:
   - hostPath:
-      path: /srv/kubernetes
+      path: {{ kubernetes_script_dir }}
     name: k8s
   - hostPath:
-      path: /etc/kubernetes/manifests
+      path: {{ kubernetes_manifest_dir }}
     name: manifests

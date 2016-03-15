@@ -7,14 +7,14 @@ Restart=always
 RestartSec=10
 ExecStartPre=/usr/bin/mkdir -p /etc/kubernetes/manifests
 
-Environment=KUBELET_VERSION={{ k8s_version }}
+Environment=KUBELET_VERSION={{ kubernetes_version }}
 ExecStart=/opt/bin/kubelet-wrapper \
   --api_servers=http://127.0.0.1:8080 \
   --register-node=false \
   --allow-privileged=true \
   --config=/etc/kubernetes/manifests \
   --hostname-override={{ inventory_hostname }} \
-  --cluster_dns={{ k8s_dns_service_ip }} \
+  --cluster_dns={{ kubernetes_dns_service_ip }} \
   --cluster_domain=cluster.local
 
 [Install]

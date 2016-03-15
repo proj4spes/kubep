@@ -1,11 +1,11 @@
 ---
 # defaults file for k8s-master
-k8s_version: v1.1.8_coreos.0
-
-k8s_service_ip_range: 10.3.0.0/24
-k8s_service_ip: 10.3.0.1
-k8s_dns_service_ip: 10.3.0.10
-
-k8s_pod_network: 10.2.0.0/16
 k8s_etcd_servers: "{% for host in groups[etcd_servers_group] %}http://{{ hostvars[host].ansible_default_ipv4.address }}:4001{% if not loop.last %},{% endif %}{% endfor %}"
-k8s_kubelet_wrapper: https://raw.githubusercontent.com/coreos/coreos-overlay/master/app-admin/kubelet-wrapper/files/kubelet-wrapper
+# Service account users
+k8s_users:
+  kube:
+    pass: changeme
+    role: admin
+  root:
+    pass: changeme
+    role: admin

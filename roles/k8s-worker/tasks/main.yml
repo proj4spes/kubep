@@ -1,15 +1,15 @@
 # config
-- name: create kubernetes config dirs
+- name: create kubernetes dirs
   file:
     path: "{{ item }}"
     state: directory
     mode: 0755
   with_items:
-    - /srv/kubernetes/manifests
-    - /etc/kubernetes/manifests
+    - "{{ kubernetes_config_dir }}"
+    - "{{ kubernetes_script_dir }}"
   become: yes
   tags:
-    - kubernetes
+    - k8s-worker
 
 # kubelet-wrapper is only available on CoreOS 962.0.0+ so we make sure its here
 # to ensure backwards compatability.
@@ -17,11 +17,11 @@
 - name: download kubelet-wrapper
   become: yes
   get_url:
-    url: "{{ k8s_kubelet_wrapper }}"
+    url: "{{ kubernetes_kubelet_wrapper }}"
     dest: /opt/bin/kubelet-wrapper
     mode: 0775
   tags:
-    - kubernetes
+    - k8s-worker
 
 # worker
 - name: deploy kubelet service
@@ -51,8 +51,8 @@
     dest: "{{ item.dest }}"
   with_items:
     - src: worker-kubeconfig.yaml.j2
-      dest: /etc/kubernetes/manifests/worker-kubeconfig.yaml
+      dest: "{{ kubernetes_config_dir }}/worker-kubeconfig.yaml"
     - src: kube-proxy.yaml.j2
-      dest: /etc/kubernetes/manifests/kube-proxy.yaml
+      dest: "{{ kubernetes_manifest_dir }}/kube-proxy.yaml"
   tags:
     - k8s-worker
