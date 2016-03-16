@@ -1,40 +1,38 @@
 variable "ca_cert_pem" {}
 variable "ca_private_key_pem" {}
+variable "ip_addresses" {}
 
-# Kubernetes apiserver cert
+# Kubernetes apiserver certs
 resource "tls_private_key" "apiserver" {
   algorithm = "RSA"
 }
 
 resource "tls_cert_request" "apiserver" {
-  key_algorithm = "RSA"
-
+  key_algorithm   = "RSA"
   private_key_pem = "${tls_private_key.apiserver.private_key_pem}"
 
   subject {
-    common_name  = "*"
-    organization = "apiserver"
+    common_name = "kube-apiserver"
   }
 
   dns_names = [
     "kubernetes",
     "kubernetes.default",
     "kubernetes.default.svc",
-    "kubernetes.default.svc.cluster.local",
-    "10.3.0.1", # k8s Service IP
+    "kubernetes.default.svc.cluster.local"
   ]
+  ip_addresses = ["${split(\",\", var.ip_addresses)}"]
 }
 
 resource "tls_locally_signed_cert" "apiserver" {
-  cert_request_pem = "${tls_cert_request.apiserver.cert_request_pem}"
-
+  cert_request_pem   = "${tls_cert_request.apiserver.cert_request_pem}"
   ca_key_algorithm   = "RSA"
   ca_private_key_pem = "${var.ca_private_key_pem}"
   ca_cert_pem        = "${var.ca_cert_pem}"
 
-  validity_period_hours = 43800
-
-  early_renewal_hours = 720
+  # valid for 365 days
+  validity_period_hours = 8760
+  early_renewal_hours   = 720
 
   allowed_uses = [
     "server_auth",

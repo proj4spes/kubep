@@ -64,6 +64,7 @@ module "apiserver_cert" {
   source             = "../certs/kubernetes/apiserver"
   ca_cert_pem        = "${module.ca.ca_cert_pem}"
   ca_private_key_pem = "${module.ca.ca_private_key_pem}"
+  ip_addresses       = "${join(",", digitalocean_droplet.master.*.ipv4_address)}"
 }
 
 module "worker_cert" {
@@ -82,8 +83,6 @@ resource "template_file" "master_cloud_init" {
     etcd_ca            = "${replace(module.ca.ca_cert_pem, \"\n\", \"\\n\")}"
     etcd_cert          = "${replace(module.etcd_cert.etcd_cert_pem, \"\n\", \"\\n\")}"
     etcd_key           = "${replace(module.etcd_cert.etcd_private_key, \"\n\", \"\\n\")}"
-    apiserver_cert     = "${replace(module.apiserver_cert.apiserver_cert_pem, \"\n\", \"\\n\")}"
-    apiserver_key      = "${replace(module.apiserver_cert.apiserver_private_key, \"\n\", \"\\n\")}"
     kubernetes_ca      = "${replace(module.ca.ca_cert_pem, \"\n\", \"\\n\")}"
   }
 }
@@ -98,8 +97,8 @@ resource "template_file" "worker_cloud_init" {
     etcd_ca            = "${replace(module.ca.ca_cert_pem, \"\n\", \"\\n\")}"
     etcd_cert          = "${replace(module.etcd_cert.etcd_cert_pem, \"\n\", \"\\n\")}"
     etcd_key           = "${replace(module.etcd_cert.etcd_private_key, \"\n\", \"\\n\")}"
-    worker_cert        = "${replace(module.apiserver_cert.apiserver_cert_pem, \"\n\", \"\\n\")}"
-    worker_key         = "${replace(module.apiserver_cert.apiserver_private_key, \"\n\", \"\\n\")}"
+    worker_cert        = "${replace(module.worker_cert.worker_cert_pem, \"\n\", \"\\n\")}"
+    worker_key         = "${replace(module.worker_cert.worker_private_key, \"\n\", \"\\n\")}"
     kubernetes_ca      = "${replace(module.ca.ca_cert_pem, \"\n\", \"\\n\")}"
   }
 }
@@ -167,6 +166,34 @@ resource "digitalocean_droplet" "worker" {
       "~/bin/python /tmp/coreos/get-pip.py",
       "sudo mv /tmp/coreos/runner ~/bin/pip && sudo chmod 0755 ~/bin/pip",
       "sudo rm -rf /tmp/coreos"
+    ]
+  }
+}
+
+# Generate certificates for the master apiserver and push them into the machines
+resource "null_resource" "configure-master-certs" {
+  depends_on = ["digitalocean_droplet.master"]
+  count      = "${var.masters}"
+
+  # Changes to the number of masters triggers the provisioner again across
+  # all instances.
+  triggers {
+    master_instances      = "${var.masters}"
+    apiserver_private_key = "${module.apiserver_cert.apiserver_private_key}"
+    apiserver_cert_pem    = "${module.apiserver_cert.apiserver_cert_pem}"
+  }
+
+  connection {
+    user         = "core"
+    private_key  = "${tls_private_key.ssh.private_key_pem}"
+    host         = "${element(digitalocean_droplet.master.*.ipv4_address, count.index)}"
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "echo '${module.apiserver_cert.apiserver_private_key}' | sudo tee /etc/kubernetes/ssl/apiserver-key.pem",
+      "echo '${module.apiserver_cert.apiserver_cert_pem}' | sudo tee /etc/kubernetes/ssl/apiserver.pem",
+      "sudo chmod 600 /etc/kubernetes/ssl/apiserver-key.pem",
+      "sudo chmod 644 /etc/kubernetes/ssl/apiserver.pem"
     ]
   }
 }

@@ -69,12 +69,6 @@ write_files:
   - path: /etc/ssl/etcd/private/etcd.pem
     permissions: 0644
     content: "${etcd_key}"
-  - path: /etc/kubernetes/ssl/apiserver.pem
-    permissions: 0644
-    content: "${apiserver_cert}"
-  - path: /etc/kubernetes/ssl/apiserver-key.pem
-    permissions: 0600
-    content: "${apiserver_key}"
   - path: /etc/kubernetes/ssl/ca.pem
     permissions: 0644
     content: "${kubernetes_ca}"
