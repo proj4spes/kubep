@@ -76,6 +76,12 @@ module "worker_certs" {
   worker_count       = "${var.workers}"
 }
 
+module "admin_cert" {
+  source             = "../certs/kubernetes/admin"
+  ca_cert_pem        = "${module.ca.ca_cert_pem}"
+  ca_private_key_pem = "${module.ca.ca_private_key_pem}"
+}
+
 resource "template_file" "master_cloud_init" {
   template   = "master-cloud-config.yml.tpl"
   depends_on = ["template_file.etcd_discovery_url"]
@@ -224,6 +230,42 @@ resource "null_resource" "configure-worker-certs" {
       "sudo chmod 600 /etc/kubernetes/ssl/worker-key.pem",
       "sudo chmod 644 /etc/kubernetes/ssl/worker.pem"
     ]
+  }
+}
+
+# kubectl config
+resource "null_resource" "kubectl-cfg" {
+  depends_on = ["digitalocean_droplet.master"]
+
+  triggers {
+    ca_pem            = "${module.ca.ca_cert_pem}"
+    admin_private_key = "${module.admin_cert.private_key}"
+    admin_certs_pem   = "${module.admin_cert.cert_pem}"
+  }
+
+  # export certificates for kubectl
+  provisioner "local-exec" {
+    command = "echo '${module.ca.ca_cert_pem}' | tee ${path.module}/ca.pem && chmod 644 ${path.module}/ca.pem"
+  }
+  provisioner "local-exec" {
+    command = "echo '${module.admin_cert.cert_pem}' | tee ${path.module}/admin.pem && chmod 644 ${path.module}/admin.pem"
+  }
+  provisioner "local-exec" {
+    command = "echo '${module.admin_cert.private_key}' | tee ${path.module}/admin-key.pem && chmod 600 ${path.module}/admin-key.pem"
+  }
+
+  # setup kubectl
+  provisioner "local-exec" {
+    command = "kubectl config set-cluster default-cluster --server=https://${digitalocean_droplet.master.0.ipv4_address} --certificate-authority=${path.module}/ca.pem"
+  }
+  provisioner "local-exec" {
+    command = "kubectl config set-credentials default-admin --certificate-authority=${path.module}/ca.pem --client-key=${path.module}/admin-key.pem --client-certificate=${path.module}/admin.pem"
+  }
+  provisioner "local-exec" {
+    command = "kubectl config set-context default-system --cluster=default-cluster --user=default-admin"
+  }
+  provisioner "local-exec" {
+    command = "kubectl config use-context default-system"
   }
 }
 
