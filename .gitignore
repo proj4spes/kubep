@@ -10,7 +10,6 @@ ssh.config
 vendor
 .bundle
 .kitchen
-inventory/terraform.py
 terraform/**/.terraform
 roles/coreos_timezone
 /_book/
