@@ -23,6 +23,7 @@
 - hosts: masters
   roles:
     - k8s-master
+    - addons
 
 - hosts: workers
   roles:

@@ -1,0 +1,9 @@
+---
+# defaults file for addons
+
+# determines if we are on the first master instance.
+is_first_master: "{% if inventory_hostname == groups['masters'][0] %}true{% else %}false{% endif %}"
+
+# skydns
+dns_domain: cluster.local
+dns_replicas: 1
