@@ -7,8 +7,7 @@ resource "tls_private_key" "kube-admin" {
 }
 
 resource "tls_cert_request" "kube-admin" {
-  key_algorithm = "RSA"
-
+  key_algorithm   = "RSA"
   private_key_pem = "${tls_private_key.kube-admin.private_key_pem}"
 
   subject {
@@ -34,9 +33,9 @@ resource "tls_locally_signed_cert" "kube-admin" {
   ]
 }
 
-output "kube_admin_private_key" {
+output "private_key" {
   value = "${tls_private_key.kube-admin.private_key_pem}"
 }
-output "kube_admin_cert_pem" {
+output "cert_pem" {
   value = "${tls_locally_signed_cert.kube-admin.cert_pem}"
 }

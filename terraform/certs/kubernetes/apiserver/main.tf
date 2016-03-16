@@ -1,6 +1,7 @@
 variable "ca_cert_pem" {}
 variable "ca_private_key_pem" {}
 variable "ip_addresses" {}
+variable "master_count" {}
 
 # Kubernetes apiserver certs
 resource "tls_private_key" "apiserver" {
@@ -8,6 +9,7 @@ resource "tls_private_key" "apiserver" {
 }
 
 resource "tls_cert_request" "apiserver" {
+  count           = "${var.master_count}"
   key_algorithm   = "RSA"
   private_key_pem = "${tls_private_key.apiserver.private_key_pem}"
 
@@ -21,11 +23,12 @@ resource "tls_cert_request" "apiserver" {
     "kubernetes.default.svc",
     "kubernetes.default.svc.cluster.local"
   ]
-  ip_addresses = ["${split(\",\", var.ip_addresses)}"]
+  ip_addresses = ["${element(split(\",\", var.ip_addresses), count.index)}"]
 }
 
 resource "tls_locally_signed_cert" "apiserver" {
-  cert_request_pem   = "${tls_cert_request.apiserver.cert_request_pem}"
+  count              = "${var.master_count}"
+  cert_request_pem   = "${element(tls_cert_request.apiserver.*.cert_request_pem, count.index)}"
   ca_key_algorithm   = "RSA"
   ca_private_key_pem = "${var.ca_private_key_pem}"
   ca_cert_pem        = "${var.ca_cert_pem}"
@@ -42,9 +45,9 @@ resource "tls_locally_signed_cert" "apiserver" {
   ]
 }
 
-output "apiserver_private_key" {
+output "private_key" {
   value = "${tls_private_key.apiserver.private_key_pem}"
 }
-output "apiserver_cert_pem" {
-  value = "${tls_locally_signed_cert.apiserver.cert_pem}"
+output "cert_pems" {
+  value = "${join(",", tls_locally_signed_cert.apiserver.*.cert_pem)}"
 }

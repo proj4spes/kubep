@@ -70,12 +70,6 @@ write_files:
   - path: /etc/ssl/etcd/private/etcd.pem
     permissions: 0644
     content: "${etcd_key}"
-  - path: /etc/kubernetes/ssl/worker.pem
-    permissions: 0644
-    content: "${worker_cert}"
-  - path: /etc/kubernetes/ssl/worker-key.pem
-    permissions: 0600
-    content: "${worker_key}"
   - path: /etc/kubernetes/ssl/ca.pem
     permissions: 0644
     content: "${kubernetes_ca}"
