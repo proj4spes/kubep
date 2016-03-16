@@ -7,7 +7,7 @@ spec:
   hostNetwork: true
   containers:
   - name: scheduler-elector
-    image: gcr.io/google_containers/podmaster:1.1
+    image: gcr.io/google_containers/podmaster:{{ k8s_podmaster_version }}
     command:
     - /podmaster
     - --etcd-servers={{ k8s_etcd_servers }}
@@ -22,7 +22,7 @@ spec:
     - mountPath: /dst/manifests
       name: manifests
   - name: controller-manager-elector
-    image: gcr.io/google_containers/podmaster:1.1
+    image: gcr.io/google_containers/podmaster:{{ k8s_podmaster_version }}
     command:
     - /podmaster
     - --etcd-servers={{ k8s_etcd_servers }}
@@ -39,7 +39,7 @@ spec:
       name: manifests
   volumes:
   - hostPath:
-      path: {{ kubernetes_script_dir }}
+      path: {{ kubernetes_podmaster_dir }}
     name: k8s
   - hostPath:
       path: {{ kubernetes_manifest_dir }}

@@ -60,17 +60,20 @@ module "etcd_cert" {
   ca_private_key_pem = "${module.ca.ca_private_key_pem}"
 }
 
-module "apiserver_cert" {
+module "apiserver_certs" {
   source             = "../certs/kubernetes/apiserver"
   ca_cert_pem        = "${module.ca.ca_cert_pem}"
   ca_private_key_pem = "${module.ca.ca_private_key_pem}"
   ip_addresses       = "${join(",", digitalocean_droplet.master.*.ipv4_address)}"
+  master_count       = "${var.masters}"
 }
 
-module "worker_cert" {
+module "worker_certs" {
   source             = "../certs/kubernetes/worker"
   ca_cert_pem        = "${module.ca.ca_cert_pem}"
   ca_private_key_pem = "${module.ca.ca_private_key_pem}"
+  ip_addresses       = "${join(",", digitalocean_droplet.worker.*.ipv4_address)}"
+  worker_count       = "${var.workers}"
 }
 
 resource "template_file" "master_cloud_init" {
@@ -97,8 +100,6 @@ resource "template_file" "worker_cloud_init" {
     etcd_ca            = "${replace(module.ca.ca_cert_pem, \"\n\", \"\\n\")}"
     etcd_cert          = "${replace(module.etcd_cert.etcd_cert_pem, \"\n\", \"\\n\")}"
     etcd_key           = "${replace(module.etcd_cert.etcd_private_key, \"\n\", \"\\n\")}"
-    worker_cert        = "${replace(module.worker_cert.worker_cert_pem, \"\n\", \"\\n\")}"
-    worker_key         = "${replace(module.worker_cert.worker_private_key, \"\n\", \"\\n\")}"
     kubernetes_ca      = "${replace(module.ca.ca_cert_pem, \"\n\", \"\\n\")}"
   }
 }
@@ -108,7 +109,7 @@ resource "digitalocean_droplet" "master" {
   image              = "${var.coreos_image}"
   region             = "${var.region}"
   count              = "${var.masters}"
-  name               = "k8s-master-${count.index}"
+  name               = "kube-master-${count.index}"
   size               = "${var.master_instance_type}"
   private_networking = true
   user_data          = "${template_file.master_cloud_init.rendered}"
@@ -142,7 +143,7 @@ resource "digitalocean_droplet" "worker" {
   image              = "${var.coreos_image}"
   region             = "${var.region}"
   count              = "${var.workers}"
-  name               = "k8s-worker-${count.index}"
+  name               = "kube-worker-${count.index}"
   size               = "${var.worker_instance_type}"
   private_networking = true
   user_data          = "${template_file.worker_cloud_init.rendered}"
@@ -170,7 +171,7 @@ resource "digitalocean_droplet" "worker" {
   }
 }
 
-# Generate certificates for the master apiserver and push them into the machines
+# Generate certificates for the master apiserver and push them into the instances
 resource "null_resource" "configure-master-certs" {
   depends_on = ["digitalocean_droplet.master"]
   count      = "${var.masters}"
@@ -179,8 +180,8 @@ resource "null_resource" "configure-master-certs" {
   # all instances.
   triggers {
     master_instances      = "${var.masters}"
-    apiserver_private_key = "${module.apiserver_cert.apiserver_private_key}"
-    apiserver_cert_pem    = "${module.apiserver_cert.apiserver_cert_pem}"
+    apiserver_private_key = "${module.apiserver_certs.private_key}"
+    apiserver_certs_pem   = "${element(split(",", module.apiserver_certs.cert_pems), count.index)}"
   }
 
   connection {
@@ -190,10 +191,38 @@ resource "null_resource" "configure-master-certs" {
   }
   provisioner "remote-exec" {
     inline = [
-      "echo '${module.apiserver_cert.apiserver_private_key}' | sudo tee /etc/kubernetes/ssl/apiserver-key.pem",
-      "echo '${module.apiserver_cert.apiserver_cert_pem}' | sudo tee /etc/kubernetes/ssl/apiserver.pem",
+      "echo '${module.apiserver_certs.private_key}' | sudo tee /etc/kubernetes/ssl/apiserver-key.pem",
+      "echo '${element(split(",", module.apiserver_certs.cert_pems), count.index)}' | sudo tee /etc/kubernetes/ssl/apiserver.pem",
       "sudo chmod 600 /etc/kubernetes/ssl/apiserver-key.pem",
       "sudo chmod 644 /etc/kubernetes/ssl/apiserver.pem"
+    ]
+  }
+}
+
+# Generate a cert for each worker machine and push it into the instances
+resource "null_resource" "configure-worker-certs" {
+  depends_on = ["digitalocean_droplet.worker"]
+  count      = "${var.workers}"
+
+  # Changes to the number of workers triggers the provisioner again across
+  # all instances.
+  triggers {
+    worker_instances   = "${var.workers}"
+    worker_private_key = "${module.worker_certs.private_key}"
+    worker_certs_pem   = "${element(split(",", module.worker_certs.cert_pems), count.index)}"
+  }
+
+  connection {
+    user         = "core"
+    private_key  = "${tls_private_key.ssh.private_key_pem}"
+    host         = "${element(digitalocean_droplet.worker.*.ipv4_address, count.index)}"
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "echo '${module.worker_certs.private_key}' | sudo tee /etc/kubernetes/ssl/worker-key.pem",
+      "echo '${element(split(",", module.worker_certs.cert_pems), count.index)}' | sudo tee /etc/kubernetes/ssl/worker.pem",
+      "sudo chmod 600 /etc/kubernetes/ssl/worker-key.pem",
+      "sudo chmod 644 /etc/kubernetes/ssl/worker.pem"
     ]
   }
 }
