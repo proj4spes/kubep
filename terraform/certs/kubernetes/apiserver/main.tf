@@ -2,6 +2,7 @@ variable "ca_cert_pem" {}
 variable "ca_private_key_pem" {}
 variable "ip_addresses" {}
 variable "master_count" {}
+variable "kube_service_ip" { default = "10.3.0.1" }
 
 # Kubernetes apiserver certs
 resource "tls_private_key" "apiserver" {
@@ -23,7 +24,10 @@ resource "tls_cert_request" "apiserver" {
     "kubernetes.default.svc",
     "kubernetes.default.svc.cluster.local"
   ]
-  ip_addresses = ["${element(split(\",\", var.ip_addresses), count.index)}"]
+  ip_addresses = [
+    "${var.kube_service_ip}",
+    "${element(split(\",\", var.ip_addresses), count.index)}"
+  ]
 }
 
 resource "tls_locally_signed_cert" "apiserver" {
