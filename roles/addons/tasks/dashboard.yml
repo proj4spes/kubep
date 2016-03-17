@@ -2,7 +2,7 @@
 # create kubernetes-dashboard
 - name: create dashboard pod file
   become: yes
-  template:
+  copy:
     src: dashboard-rc.yaml
     dest: "{{ kubernetes_manifest_dir }}/dashboard-rc.yaml"
   tags:
@@ -11,7 +11,7 @@
 
 - name: create dashboard service file
   become: yes
-  template:
+  copy:
     src: dashboard-svc.yaml
     dest: "{{ kubernetes_manifest_dir }}/skydns-svc.yaml"
   tags:
