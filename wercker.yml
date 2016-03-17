@@ -1,4 +1,4 @@
-box: wercker/python
+box: python
 no-response-timeout: 15
 build:
   steps:
@@ -17,7 +17,6 @@ build:
           find terraform/aws/private-cloud/ -type d \( -path terraform/aws/private-cloud/bin -path .terraform \) -prune -exec sh -c '(cd {} && terraform validate)' ';'
           find terraform/aws/public-cloud/ -type d \( -path .terraform \) -prune -exec sh -c '(cd {} && terraform validate)' ';'
           find terraform/digitalocean/ -type d \( -path .terraform \) -prune -exec sh -c '(cd {} && terraform validate)' ';'
-          find terraform/gce/ -type d \( -path .terraform \) -prune -exec sh -c '(cd {} && terraform validate)' ';'
     - script:
         name: syntax-check ansible playbook
         code: |
