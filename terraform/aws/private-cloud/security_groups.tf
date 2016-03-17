@@ -1,5 +1,5 @@
 resource "aws_security_group" "bastion" {
-  name        = "bastion-apollo"
+  name        = "kube-bastion"
   description = "Security group for bastion instances that allows SSH and VPN traffic from internet"
   vpc_id      = "${module.vpc.vpc_id}"
 
@@ -50,6 +50,6 @@ resource "aws_security_group" "bastion" {
   }
 
   tags {
-    Name = "bastion-apollo-sg"
+    Name = "kube-bastion-sg"
   }
 }
