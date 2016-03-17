@@ -1,5 +1,5 @@
 variable "do_token" {}
-variable "organization" { default = "apollo" }
+variable "organization" { default = "kubeform" }
 variable "region" { default = "lon1" }
 variable "masters" { default = "3" }
 variable "workers" { default = "1" }
