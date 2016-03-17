@@ -1,4 +1,4 @@
-variable "elb_name" { default = "apollo-elb" }
+variable "elb_name" { default = "kubeform-elb" }
 variable "backend_port" { default = "80"}
 variable "backend_protocol" { default = "http" }
 variable "health_check_target" { default = "HTTP:8888/health" }
