@@ -11,6 +11,6 @@
 #- include: monitoring.yml
 #  when: enable_monitoring and is_first_master|bool
 
-#- include: dashboard.yml
-#  when: enable_dashboard and is_first_master|bool
+- include: dashboard.yml
+  when: enable_dashboard and is_first_master|bool
 

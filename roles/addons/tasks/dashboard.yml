@@ -1,0 +1,22 @@
+---
+# create kubernetes-dashboard
+- name: create dashboard pod file
+  become: yes
+  template:
+    src: dashboard-rc.yaml
+    dest: "{{ kubernetes_manifest_dir }}/dashboard-rc.yaml"
+  tags:
+    - addons
+    - dashboard
+
+- name: create dashboard service file
+  become: yes
+  template:
+    src: dashboard-svc.yaml
+    dest: "{{ kubernetes_manifest_dir }}/skydns-svc.yaml"
+  tags:
+    - addons
+    - dashboard
+
+# @todo - we need to call kubelet here to provision the skydns replication
+# controller and sydns service properly
