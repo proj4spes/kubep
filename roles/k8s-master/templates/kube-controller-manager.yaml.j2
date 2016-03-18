@@ -6,7 +6,7 @@ metadata:
 spec:
   containers:
   - name: kube-controller-manager
-    image: gcr.io/v2/google_containers/hyperkube:{{ kubernetes_version }}
+    image: {{ kubernetes_image }}:{{ kubernetes_version }}
     command:
     - /hyperkube
     - controller-manager
