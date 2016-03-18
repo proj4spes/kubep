@@ -1,5 +1,0 @@
----
-# defaults file for k8s-worker
-k8s_api_servers: "{% for host in groups[api_servers_group] %}https://{{ hostvars[host].ansible_default_ipv4.address }}{% if not loop.last %},{% endif %}{% endfor %}"
-# @todo this should be a load balancer not a single master.
-k8s_master: "https://{{ hostvars[groups[api_servers_group][0]].ansible_default_ipv4.address }}"

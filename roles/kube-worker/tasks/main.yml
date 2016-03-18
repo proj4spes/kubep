@@ -9,7 +9,7 @@
     - "{{ kubernetes_script_dir }}"
   become: yes
   tags:
-    - k8s-worker
+    - kube-worker
 
 # kubelet-wrapper is only available on CoreOS 962.0.0+ so we make sure its here
 # to ensure backwards compatability.
@@ -21,7 +21,7 @@
     dest: /opt/bin/kubelet-wrapper
     mode: 0775
   tags:
-    - k8s-worker
+    - kube-worker
 
 # worker
 - name: deploy kubelet service
@@ -33,7 +33,7 @@
     - reload systemd
     - restart kubelet
   tags:
-    - k8s-worker
+    - kube-worker
 
 - name: ensure kubelet is running
   become: yes
@@ -42,9 +42,9 @@
     state: started
     enabled: yes
   tags:
-    - k8s-worker
+    - kube-worker
 
-- name: deploy k8s-worker manifests
+- name: deploy kube-worker manifests
   become: yes
   template:
     src: "{{ item.src }}"
@@ -55,4 +55,4 @@
     - src: kube-proxy.yaml.j2
       dest: "{{ kubernetes_manifest_dir }}/kube-proxy.yaml"
   tags:
-    - k8s-worker
+    - kube-worker

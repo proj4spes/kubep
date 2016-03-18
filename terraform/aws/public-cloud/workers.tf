@@ -31,7 +31,7 @@ resource "aws_instance" "worker" {
   depends_on        = ["aws_instance.master"]
   user_data         = "${template_file.worker_cloud_init.rendered}"
   tags = {
-    Name = "k8s-worker-${count.index}"
+    Name = "kube-worker-${count.index}"
     role = "workers"
   }
   ebs_block_device {

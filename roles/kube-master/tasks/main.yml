@@ -9,7 +9,7 @@
     - "{{ kubernetes_podmaster_dir }}"
   become: yes
   tags:
-    - k8s-master
+    - kube-master
 
 # kubelet-wrapper is only available on CoreOS 962.0.0+ so we make sure its here
 # to ensure backwards compatability.
@@ -21,7 +21,7 @@
     dest: /opt/bin/kubelet-wrapper
     mode: 0775
   tags:
-    - k8s-master
+    - kube-master
 
 - name: create service account users
   become: yes
@@ -29,11 +29,11 @@
     dest: "{{ kubernetes_users_dir }}/known_users.csv"
     create: yes
     line: '{{ item.value.pass }},{{ item.key }},{{ item.value.role }}'
-  with_dict: "{{ k8s_users }}"
+  with_dict: "{{ kube_users }}"
   notify:
     - restart kubelet
   tags:
-    - k8s-master
+    - kube-master
 
 # master
 - name: deploy kubelet service
@@ -45,7 +45,7 @@
     - reload systemd
     - restart kubelet
   tags:
-    - k8s-master
+    - kube-master
 
 - name: ensure kubelet is running
   become: yes
@@ -54,9 +54,9 @@
     state: started
     enabled: yes
   tags:
-    - k8s-master
+    - kube-master
 
-- name: deploy k8s-master manifests
+- name: deploy kube-master manifests
   become: yes
   template:
     src: "{{ item.src }}"
@@ -73,13 +73,13 @@
     - src: kube-scheduler.yaml.j2
       dest: "{{ kubernetes_podmaster_dir }}/kube-scheduler.yaml"
   tags:
-    - k8s-master
+    - kube-master
 
-- name: wait for k8s-apiserver up
+- name: wait for kube-apiserver up
   wait_for:
     port: 8080
   tags:
-    - k8s-master
+    - kube-master
 
 # @todo change this to the uri module once ansible 2.1 is stable.
 - name: create kube-system namespace
@@ -88,4 +88,4 @@
     curl -XPOST -d'{"apiVersion":"v1","kind":"Namespace","metadata":{"name":"kube-system"}}' "http://127.0.0.1:8080/api/v1/namespaces"
   run_once: true
   tags:
-    - k8s-master
+    - kube-master

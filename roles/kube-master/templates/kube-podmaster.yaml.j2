@@ -7,25 +7,25 @@ spec:
   hostNetwork: true
   containers:
   - name: scheduler-elector
-    image: gcr.io/google_containers/podmaster:{{ k8s_podmaster_version }}
+    image: gcr.io/google_containers/podmaster:{{ kube_podmaster_version }}
     command:
     - /podmaster
-    - --etcd-servers={{ k8s_etcd_servers }}
+    - --etcd-servers={{ kube_etcd_servers }}
     - --key=scheduler
     - --whoami={{ ansible_default_ipv4.address }}
     - --source-file=/src/manifests/kube-scheduler.yaml
     - --dest-file=/dst/manifests/kube-scheduler.yaml
     volumeMounts:
     - mountPath: /src/manifests
-      name: k8s
+      name: kube
       readOnly: true
     - mountPath: /dst/manifests
       name: manifests
   - name: controller-manager-elector
-    image: gcr.io/google_containers/podmaster:{{ k8s_podmaster_version }}
+    image: gcr.io/google_containers/podmaster:{{ kube_podmaster_version }}
     command:
     - /podmaster
-    - --etcd-servers={{ k8s_etcd_servers }}
+    - --etcd-servers={{ kube_etcd_servers }}
     - --key=controller
     - --whoami={{ ansible_default_ipv4.address }}
     - --source-file=/src/manifests/kube-controller-manager.yaml
@@ -33,14 +33,14 @@ spec:
     terminationMessagePath: /dev/termination-log
     volumeMounts:
     - mountPath: /src/manifests
-      name: k8s
+      name: kube
       readOnly: true
     - mountPath: /dst/manifests
       name: manifests
   volumes:
   - hostPath:
       path: {{ kubernetes_podmaster_dir }}
-    name: k8s
+    name: kube
   - hostPath:
       path: {{ kubernetes_manifest_dir }}
     name: manifests
