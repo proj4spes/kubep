@@ -7,7 +7,7 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-scheduler
-    image: gcr.io/v2/google_containers/hyperkube:{{ kubernetes_version }}
+    image: {{ kubernetes_image }}:{{ kubernetes_version }}
     command:
     - /hyperkube
     - scheduler

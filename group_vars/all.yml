@@ -9,8 +9,11 @@ coreos_timezone: 'Europe/London'
 etcd_servers_group: etcd_servers
 api_servers_group: masters
 
+# kubernetes docker image
+kubernetes_image: quay.io/coreos/hyperkube
+
 # The docker container version to use for Kubernetes
-kubernetes_version: v1.2.0
+kubernetes_version: v1.1.8_coreos.0
 
 # Kubernetes log level. uses glog. See https://github.com/golang/glog
 # 0 - Generally useful for this to ALWAYS be visible to an operator
