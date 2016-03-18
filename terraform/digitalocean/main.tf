@@ -6,6 +6,7 @@ variable "workers" { default = "1" }
 variable "master_instance_type" { default = "512mb" }
 variable "worker_instance_type" { default = "512mb" }
 variable "etcd_discovery_url_file" { default = "etcd_discovery_url.txt" }
+
 /*
   we need to use at least beta because we need rkt version 0.15.0+ to run the
   kubelet wrapper script.
@@ -80,6 +81,28 @@ module "admin_cert" {
   source             = "../certs/kubernetes/admin"
   ca_cert_pem        = "${module.ca.ca_cert_pem}"
   ca_private_key_pem = "${module.ca.ca_private_key_pem}"
+}
+
+module "docker_daemon_certs" {
+  source                = "../certs/docker/daemon"
+  ca_cert_pem           = "${module.ca.ca_cert_pem}"
+  ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
+  ip_addresses_list     = "${concat(digitalocean_droplet.master.*.ipv4_address, digitalocean_droplet.worker.*.ipv4_address)}"
+  docker_daemon_count   = "${var.masters + var.workers}"
+  private_key           = "${tls_private_key.ssh.private_key_pem}"
+  validity_period_hours = 8760
+  early_renewal_hours   = 720
+}
+
+module "docker_client_certs" {
+  source                = "../certs/docker/client"
+  ca_cert_pem           = "${module.ca.ca_cert_pem}"
+  ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
+  ip_addresses_list     = "${concat(digitalocean_droplet.master.*.ipv4_address, digitalocean_droplet.worker.*.ipv4_address)}"
+  docker_client_count   = "${var.masters + var.workers}"
+  private_key           = "${tls_private_key.ssh.private_key_pem}"
+  validity_period_hours = 8760
+  early_renewal_hours   = 720
 }
 
 resource "template_file" "master_cloud_init" {
