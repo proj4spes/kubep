@@ -1,12 +1,12 @@
 ---
-# handlers file for k8s-apiserver
-- name: start k8s-apiserver
+# handlers file for kube-apiserver
+- name: start kube-apiserver
   become: yes
   service:
     name: apiserver
     state: started
 
-- name: restart k8s-apiserver
+- name: restart kube-apiserver
   become: yes
   service:
     name: apiserver

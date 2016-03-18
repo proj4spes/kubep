@@ -30,7 +30,7 @@ resource "aws_instance" "master" {
   security_groups   = ["${module.sg-default.security_group_id}"]
   user_data         = "${template_file.master_cloud_init.rendered}"
   tags = {
-    Name = "k8s-master-${count.index}"
+    Name = "kube-master-${count.index}"
     role = "masters"
   }
 }

@@ -22,8 +22,8 @@
 
 - hosts: masters
   roles:
-    - k8s-master
+    - kube-master
 
 - hosts: workers
   roles:
-    - k8s-worker
+    - kube-worker

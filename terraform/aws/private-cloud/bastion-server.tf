@@ -33,7 +33,7 @@ resource "aws_instance" "bastion" {
   source_dest_check = false
   user_data         = "${template_file.bastion_cloud_init.rendered}"
   tags = {
-    Name = "k8s-bastion"
+    Name = "kube-bastion"
     role = "bastion"
   }
   connection {

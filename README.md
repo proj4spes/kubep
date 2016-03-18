@@ -14,7 +14,7 @@ Includes the following -
 
 * CoreOS as the base operating system
 * Kubernetes (in HA) mode (leader election using Podmaster)
-* SSL certs/security for k8s cluster components
+* SSL certs/security for Kubernetes cluster components
 * Flannel for networking
 * Kubernetes Dashboard
 * Sky/KubeDNS

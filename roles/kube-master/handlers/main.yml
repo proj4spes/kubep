@@ -1,5 +1,5 @@
 ---
-# handlers file for k8s-master
+# handlers file for kube-master
 - name: start kubelet
   become: yes
   service:

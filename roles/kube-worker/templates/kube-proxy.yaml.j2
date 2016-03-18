@@ -11,7 +11,7 @@ spec:
     command:
     - /hyperkube
     - proxy
-    - --master={{ k8s_master }}
+    - --master={{ kube_master }}
     - --kubeconfig={{ kubernetes_config_dir }}/worker-kubeconfig.yaml
     - --proxy-mode=iptables
     - --v={{ kubernetes_log_level }}
