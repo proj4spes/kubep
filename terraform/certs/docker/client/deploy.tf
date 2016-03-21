@@ -19,11 +19,11 @@ resource "null_resource" "configure-docker-client-certs" {
     inline = [
       "if [ ! -d '~/.docker' ]; then mkdir ~/.docker;fi",
       "echo '${var.ca_cert_pem}' | sudo tee ~/.docker/ca.pem",
-      "echo 'tls_private_key.docker_client.private_key_pem' | sudo tee ~/.docker/key.pem",
+      "echo '${tls_private_key.docker_client.private_key_pem}' | sudo tee ~/.docker/key.pem",
       "echo '${element(tls_locally_signed_cert.docker_client.*.cert_pem, count.index)}' | sudo tee ~/.docker/cert.pem",
-      "sudo chmod 644 /home/core/.docker/ca.pem",
-      "sudo chmod 600 /home/core/.docker/key.pem",
-      "sudo chmod 644 /home/core/.docker/cert.pem"
+      "chmod 644 /home/core/.docker/ca.pem",
+      "chmod 600 /home/core/.docker/key.pem",
+      "chmod 644 /home/core/.docker/cert.pem"
     ]
   }
 }
