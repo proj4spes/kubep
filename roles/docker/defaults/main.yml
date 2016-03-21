@@ -8,7 +8,7 @@ docker_bridge_ip: ''
 docker_proxy_exceptions: ''
 docker_registry: ''
 private_docker_registry: false
-docker_tls: "--tlsverify --tlscacert=/etc/docker/ca.pem --tlskey=/etc/docker/server-key.pem"
+docker_tls: "--tlsverify --tlscacert=/etc/docker/ca.pem --tlscert=/etc/docker/server.pem --tlskey=/etc/docker/server-key.pem"
 docker_customisations: "{{ docker_endpoints }} {{ docker_tls }} {{ docker_bridge_ip }} {{ docker_storage_config }} {{ docker_dns_config }} {{ docker_registry }}"
 
 
