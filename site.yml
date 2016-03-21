@@ -20,6 +20,10 @@
 
 - include: playbooks/coreos-bootstrap.yml
 
+- hosts: all
+  roles:
+    - docker
+
 - hosts: masters
   roles:
     - kube-master
