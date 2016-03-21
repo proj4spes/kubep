@@ -11,7 +11,7 @@ resource "null_resource" "configure-docker-dameon-certs" {
   }
 
   connection {
-    user         = "core"
+    user         = "${var.user}"
     private_key  = "${var.private_key}"
     host         = "${element(var.ip_addresses_list, count.index)}"
   }

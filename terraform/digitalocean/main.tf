@@ -92,6 +92,7 @@ module "docker_daemon_certs" {
   private_key           = "${tls_private_key.ssh.private_key_pem}"
   validity_period_hours = 8760
   early_renewal_hours   = 720
+  user                  = "core"
 }
 
 module "docker_client_certs" {
@@ -103,6 +104,7 @@ module "docker_client_certs" {
   private_key           = "${tls_private_key.ssh.private_key_pem}"
   validity_period_hours = 8760
   early_renewal_hours   = 720
+  user                  = "core"
 }
 
 resource "template_file" "master_cloud_init" {
