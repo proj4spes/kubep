@@ -60,26 +60,35 @@ module "etcd_cert" {
   ca_private_key_pem = "${module.ca.ca_private_key_pem}"
 }
 
-module "apiserver_certs" {
-  source             = "../certs/kubernetes/apiserver"
-  ca_cert_pem        = "${module.ca.ca_cert_pem}"
-  ca_private_key_pem = "${module.ca.ca_private_key_pem}"
-  ip_addresses       = "${join(",", digitalocean_droplet.master.*.ipv4_address)}"
-  master_count       = "${var.masters}"
+module "kube_apiserver_certs" {
+  source                = "github.com/Capgemini/tf_tls/kubernetes/apiserver"
+  ca_cert_pem           = "${module.ca.ca_cert_pem}"
+  ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
+  ip_addresses          = "${join(",", digitalocean_droplet.master.*.ipv4_address)}"
+  master_count          = "${var.masters}"
+  validity_period_hours = "8760"
+  early_renewal_hours   = "720"
+  ssh_user              = "core"
+  ssh_private_key       = "${tls_private_key.ssh.private_key_pem}"
 }
 
-module "worker_certs" {
-  source             = "../certs/kubernetes/worker"
-  ca_cert_pem        = "${module.ca.ca_cert_pem}"
-  ca_private_key_pem = "${module.ca.ca_private_key_pem}"
-  ip_addresses       = "${join(",", digitalocean_droplet.worker.*.ipv4_address)}"
-  worker_count       = "${var.workers}"
+module "kube_worker_certs" {
+  source                = "github.com/Capgemini/tf_tls/kubernetes/worker"
+  ca_cert_pem           = "${module.ca.ca_cert_pem}"
+  ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
+  ip_addresses          = "${join(",", digitalocean_droplet.worker.*.ipv4_address)}"
+  worker_count          = "${var.workers}"
+  validity_period_hours = "8760"
+  early_renewal_hours   = "720"
+  ssh_user              = "core"
+  ssh_private_key       = "${tls_private_key.ssh.private_key_pem}"
 }
 
-module "admin_cert" {
-  source             = "../certs/kubernetes/admin"
-  ca_cert_pem        = "${module.ca.ca_cert_pem}"
-  ca_private_key_pem = "${module.ca.ca_private_key_pem}"
+module "kube_admin_cert" {
+  source                = "github.com/Capgemini/tf_tls/kubernetes/admin"
+  ca_cert_pem           = "${module.ca.ca_cert_pem}"
+  ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
+  kubectl_server_ip     = "${digitalocean_droplet.master.0.ipv4_address}"
 }
 
 resource "template_file" "master_cloud_init" {
@@ -174,98 +183,6 @@ resource "digitalocean_droplet" "worker" {
       "sudo mv /tmp/coreos/runner ~/bin/pip && sudo chmod 0755 ~/bin/pip",
       "sudo rm -rf /tmp/coreos"
     ]
-  }
-}
-
-# Generate certificates for the master apiserver and push them into the instances
-resource "null_resource" "configure-master-certs" {
-  depends_on = ["digitalocean_droplet.master"]
-  count      = "${var.masters}"
-
-  # Changes to the number of masters triggers the provisioner again across
-  # all instances.
-  triggers {
-    master_instances      = "${var.masters}"
-    apiserver_private_key = "${module.apiserver_certs.private_key}"
-    apiserver_certs_pem   = "${element(split(",", module.apiserver_certs.cert_pems), count.index)}"
-  }
-
-  connection {
-    user         = "core"
-    private_key  = "${tls_private_key.ssh.private_key_pem}"
-    host         = "${element(digitalocean_droplet.master.*.ipv4_address, count.index)}"
-  }
-  provisioner "remote-exec" {
-    inline = [
-      "echo '${module.apiserver_certs.private_key}' | sudo tee /etc/kubernetes/ssl/apiserver-key.pem",
-      "echo '${element(split(",", module.apiserver_certs.cert_pems), count.index)}' | sudo tee /etc/kubernetes/ssl/apiserver.pem",
-      "sudo chmod 600 /etc/kubernetes/ssl/apiserver-key.pem",
-      "sudo chmod 644 /etc/kubernetes/ssl/apiserver.pem"
-    ]
-  }
-}
-
-# Generate a cert for each worker machine and push it into the instances
-resource "null_resource" "configure-worker-certs" {
-  depends_on = ["digitalocean_droplet.worker"]
-  count      = "${var.workers}"
-
-  # Changes to the number of workers triggers the provisioner again across
-  # all instances.
-  triggers {
-    worker_instances   = "${var.workers}"
-    worker_private_key = "${module.worker_certs.private_key}"
-    worker_certs_pem   = "${element(split(",", module.worker_certs.cert_pems), count.index)}"
-  }
-
-  connection {
-    user         = "core"
-    private_key  = "${tls_private_key.ssh.private_key_pem}"
-    host         = "${element(digitalocean_droplet.worker.*.ipv4_address, count.index)}"
-  }
-  provisioner "remote-exec" {
-    inline = [
-      "echo '${module.worker_certs.private_key}' | sudo tee /etc/kubernetes/ssl/worker-key.pem",
-      "echo '${element(split(",", module.worker_certs.cert_pems), count.index)}' | sudo tee /etc/kubernetes/ssl/worker.pem",
-      "sudo chmod 600 /etc/kubernetes/ssl/worker-key.pem",
-      "sudo chmod 644 /etc/kubernetes/ssl/worker.pem"
-    ]
-  }
-}
-
-# kubectl config
-resource "null_resource" "kubectl-cfg" {
-  depends_on = ["digitalocean_droplet.master"]
-
-  triggers {
-    ca_pem            = "${module.ca.ca_cert_pem}"
-    admin_private_key = "${module.admin_cert.private_key}"
-    admin_certs_pem   = "${module.admin_cert.cert_pem}"
-  }
-
-  # export certificates for kubectl
-  provisioner "local-exec" {
-    command = "echo '${module.ca.ca_cert_pem}' | tee ${path.module}/ca.pem && chmod 644 ${path.module}/ca.pem"
-  }
-  provisioner "local-exec" {
-    command = "echo '${module.admin_cert.cert_pem}' | tee ${path.module}/admin.pem && chmod 644 ${path.module}/admin.pem"
-  }
-  provisioner "local-exec" {
-    command = "echo '${module.admin_cert.private_key}' | tee ${path.module}/admin-key.pem && chmod 600 ${path.module}/admin-key.pem"
-  }
-
-  # setup kubectl
-  provisioner "local-exec" {
-    command = "kubectl config set-cluster default-cluster --server=https://${digitalocean_droplet.master.0.ipv4_address} --certificate-authority=${path.module}/ca.pem"
-  }
-  provisioner "local-exec" {
-    command = "kubectl config set-credentials default-admin --certificate-authority=${path.module}/ca.pem --client-key=${path.module}/admin-key.pem --client-certificate=${path.module}/admin.pem"
-  }
-  provisioner "local-exec" {
-    command = "kubectl config set-context default-system --cluster=default-cluster --user=default-admin"
-  }
-  provisioner "local-exec" {
-    command = "kubectl config use-context default-system"
   }
 }
 
