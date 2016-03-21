@@ -84,7 +84,7 @@ module "admin_cert" {
 }
 
 module "docker_daemon_certs" {
-  source                = "../certs/docker/daemon"
+  source                = "github.com/Capgemini/tf_tls//docker/daemon"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   ip_addresses_list     = "${concat(digitalocean_droplet.master.*.ipv4_address, digitalocean_droplet.worker.*.ipv4_address)}"
@@ -96,7 +96,7 @@ module "docker_daemon_certs" {
 }
 
 module "docker_client_certs" {
-  source                = "../certs/docker/client"
+  source                = "github.com/Capgemini/tf_tls//docker/client"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   ip_addresses_list     = "${concat(digitalocean_droplet.master.*.ipv4_address, digitalocean_droplet.worker.*.ipv4_address)}"
