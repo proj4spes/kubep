@@ -1,5 +1,5 @@
 # input variables
-variable "short_name" { default = "k8s" }
+variable "short_name" { default = "kube" }
 variable "public_key_filename" { default = "~/.ssh/id_rsa_aws.pub" }
 
 # SSH keypair for the instances

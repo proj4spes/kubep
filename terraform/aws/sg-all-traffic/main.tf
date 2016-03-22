@@ -1,4 +1,4 @@
-variable "security_group_name" { default = "default-k8s" }
+variable "security_group_name" { default = "default-kube" }
 variable "vpc_id" {}
 variable "source_cidr_block" { default = "0.0.0.0/0" }
 

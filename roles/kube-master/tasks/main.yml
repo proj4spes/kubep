@@ -1,0 +1,97 @@
+- name: create kubernetes dirs
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  with_items:
+    - "{{ kubernetes_config_dir }}"
+    - "{{ kubernetes_script_dir }}"
+    - "{{ kubernetes_podmaster_dir }}"
+  become: yes
+  tags:
+    - kube-master
+
+# kubelet-wrapper is only available on CoreOS 962.0.0+ so we make sure its here
+# to ensure backwards compatability.
+# See https://coreos.com/kubernetes/docs/latest/kubelet-wrapper.html
+- name: download kubelet-wrapper
+  become: yes
+  get_url:
+    url: "{{ kubernetes_kubelet_wrapper }}"
+    dest: /opt/bin/kubelet-wrapper
+    mode: 0775
+  tags:
+    - kube-master
+
+- name: create service account users
+  become: yes
+  lineinfile:
+    dest: "{{ kubernetes_users_dir }}/known_users.csv"
+    create: yes
+    line: '{{ item.value.pass }},{{ item.key }},{{ item.value.role }}'
+  with_dict: "{{ kube_users }}"
+  notify:
+    - restart kubelet
+  tags:
+    - kube-master
+
+# master
+- name: deploy kubelet service
+  become: yes
+  template:
+    src: kubelet.service.j2
+    dest: /etc/systemd/system/kubelet.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - reload systemd
+    - restart kubelet
+  tags:
+    - kube-master
+
+- name: ensure kubelet is running
+  become: yes
+  service:
+    name: kubelet
+    state: started
+    enabled: yes
+  tags:
+    - kube-master
+
+- name: deploy kube-master manifests
+  become: yes
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - src: kube-proxy.yaml.j2
+      dest: "{{ kubernetes_manifest_dir }}/kube-proxy.yaml"
+    - src: kube-apiserver.yaml.j2
+      dest: "{{ kubernetes_manifest_dir }}/kube-apiserver.yaml"
+    - src: kube-podmaster.yaml.j2
+      dest: "{{ kubernetes_manifest_dir }}/kube-podmaster.yaml"
+    - src: kube-controller-manager.yaml.j2
+      dest: "{{ kubernetes_podmaster_dir }}/kube-controller-manager.yaml"
+    - src: kube-scheduler.yaml.j2
+      dest: "{{ kubernetes_podmaster_dir }}/kube-scheduler.yaml"
+  tags:
+    - kube-master
+
+- name: wait for kube-apiserver up
+  wait_for:
+    port: 8080
+  tags:
+    - kube-master
+
+# @todo change this to the uri module once ansible 2.1 is stable.
+- name: create kube-system namespace
+  become: yes
+  command: >
+    curl -XPOST -d'{"apiVersion":"v1","kind":"Namespace","metadata":{"name":"kube-system"}}' "http://127.0.0.1:8080/api/v1/namespaces"
+  run_once: true
+  tags:
+    - kube-master

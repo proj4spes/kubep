@@ -1,0 +1,13 @@
+---
+# handlers file for kube-master
+- name: start kubelet
+  become: yes
+  service:
+    name: kubelet
+    state: started
+
+- name: restart kubelet
+  become: yes
+  service:
+    name: kubelet
+    state: restarted
