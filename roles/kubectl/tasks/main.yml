@@ -12,6 +12,13 @@
   tags:
     - kubectl
 
+- name: Creates kubectl user directory
+  become: yes
+  become_user: root
+  file:
+    path: /root/.kube
+    state: directory
+
 - name: deploy kubectl config
   become: yes
   become_user: root

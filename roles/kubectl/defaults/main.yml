@@ -5,7 +5,7 @@ kubectl_certificate_authority: '/etc/kubernetes/ssl/ca.pem'
 kubectl_server: "https://{{ ansible_host }}"
 kubectl_cluster_name: 'default-cluster'
 kubectl_context_cluster: 'default-cluster'
-kubectl_context_user: 'default-cluster'
+kubectl_context_user: 'default-admin'
 kubectl_context_name: 'default-system'
 kubectl_context_current: 'default-system'
 kubectl_users_name: 'default-admin'
