@@ -5,7 +5,6 @@
   template:
     src: skydns-rc.yaml.j2
     dest: "{{ kubernetes_manifest_dir }}/skydns-rc.yaml"
-  register: skydns_rc
   tags:
     - addons
     - skydns
@@ -15,21 +14,30 @@
   template:
     src: skydns-svc.yaml.j2
     dest: "{{ kubernetes_manifest_dir }}/skydns-svc.yaml"
-  register: skydns_svc
   tags:
     - addons
     - skydns
 
-- name: create or update SkyDNS replication controller
+- name: Create SkyDNS replication controller
   become: yes
-  command: "{{ kubectl_bin }} {{ skydns_rc.changed | ternary('apply', 'create') }} -f {{ kubernetes_manifest_dir }}/skydns-rc.yaml"
+  kubernetes:
+    api_endpoint: "{{ kubectl_endpoint }}"
+    url_username: "{{ kubectl_username }}"
+    url_password: "{{ kubectl_password }}"
+    file_reference: "{{ kubernetes_manifest_dir }}/skydns-rc.yaml"
+    state: present
   tags:
     - addons
     - skydns
 
-- name: create or update SkyDNS service
+- name: Create SkyDNS service
   become: yes
-  command: "{{ kubectl_bin }} {{ skydns_svc.changed | ternary('apply', 'create') }} -f {{ kubernetes_manifest_dir }}/skydns-svc.yaml"
+  kubernetes:
+    api_endpoint: "{{ kubectl_endpoint }}"
+    url_username: "{{ kubectl_username }}"
+    url_password: "{{ kubectl_password }}"
+    file_reference: "{{ kubernetes_manifest_dir }}/skydns-svc.yaml"
+    state: present
   tags:
     - addons
     - skydns
