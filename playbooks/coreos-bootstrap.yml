@@ -5,7 +5,7 @@
   roles:
     - coreos_timezone
 
-- name: Install docker-py
+- name: Install pip packages
   hosts: all:!role=bastion
   gather_facts: False
   environment: "{{ proxy_env }}"
@@ -13,3 +13,6 @@
     - pip:
         name: docker-py
         version: 1.5.0
+    - pip:
+        name: pyyaml
+        version: 3.11

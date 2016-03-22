@@ -5,7 +5,6 @@
   copy:
     src: dashboard-rc.yaml
     dest: "{{ kubernetes_manifest_dir }}/dashboard-rc.yaml"
-  register: dashboard_rc
   tags:
     - addons
     - dashboard
@@ -15,21 +14,30 @@
   copy:
     src: dashboard-svc.yaml
     dest: "{{ kubernetes_manifest_dir }}/dashboard-svc.yaml"
-  register: dashboard_svc
   tags:
     - addons
     - dashboard
 
-- name: create or update Kubernetes dashboard replication controller
+- name: Create dashboard replication controller
   become: yes
-  command: "{{ kubectl_bin }} {{ dashboard_rc.changed | ternary('apply', 'create') }} -f {{ kubernetes_manifest_dir }}/dashboard-rc.yaml"
+  kubernetes:
+    api_endpoint: "{{ kubectl_endpoint }}"
+    url_username: "{{ kubectl_username }}"
+    url_password: "{{ kubectl_password }}"
+    file_reference: "{{ kubernetes_manifest_dir }}/dashboard-rc.yaml"
+    state: present
   tags:
     - addons
     - dashboard
 
-- name: create or update Kubernetes dashboard service
+- name: Create dashboard service
   become: yes
-  command: "{{ kubectl_bin }} {{ dashboard_svc.changed | ternary('apply', 'create') }} -f {{ kubernetes_manifest_dir }}/dashboard-svc.yaml"
+  kubernetes:
+    api_endpoint: "{{ kubectl_endpoint }}"
+    url_username: "{{ kubectl_username }}"
+    url_password: "{{ kubectl_password }}"
+    file_reference: "{{ kubernetes_manifest_dir }}/dashboard-svc.yaml"
+    state: present
   tags:
     - addons
     - dashboard
