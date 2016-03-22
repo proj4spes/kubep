@@ -7,3 +7,4 @@ is_first_master: "{% if inventory_hostname == groups['masters'][0] %}true{% else
 # skydns
 dns_domain: cluster.local
 dns_replicas: 1
+kubectl_bin: /opt/bin/kubectl
