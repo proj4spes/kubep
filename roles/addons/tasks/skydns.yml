@@ -1,0 +1,35 @@
+---
+# SkyDNS service addon
+- name: create SkyDNS pod file
+  become: yes
+  template:
+    src: skydns-rc.yaml.j2
+    dest: "{{ kubernetes_manifest_dir }}/skydns-rc.yaml"
+  register: skydns_rc
+  tags:
+    - addons
+    - skydns
+
+- name: create SkyDNS service file
+  become: yes
+  template:
+    src: skydns-svc.yaml.j2
+    dest: "{{ kubernetes_manifest_dir }}/skydns-svc.yaml"
+  register: skydns_svc
+  tags:
+    - addons
+    - skydns
+
+- name: create or update SkyDNS replication controller
+  become: yes
+  command: "{{ kubectl_bin }} {{ skydns_rc.changed | ternary('apply', 'create') }} -f {{ kubernetes_manifest_dir }}/skydns-rc.yaml"
+  tags:
+    - addons
+    - skydns
+
+- name: create or update SkyDNS service
+  become: yes
+  command: "{{ kubectl_bin }} {{ skydns_svc.changed | ternary('apply', 'create') }} -f {{ kubernetes_manifest_dir }}/skydns-svc.yaml"
+  tags:
+    - addons
+    - skydns

@@ -41,6 +41,9 @@
   template:
     src: kubelet.service.j2
     dest: /etc/systemd/system/kubelet.service
+    owner: root
+    group: root
+    mode: 0644
   notify:
     - reload systemd
     - restart kubelet
@@ -61,6 +64,9 @@
   template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0644
   with_items:
     - src: kube-proxy.yaml.j2
       dest: "{{ kubernetes_manifest_dir }}/kube-proxy.yaml"
