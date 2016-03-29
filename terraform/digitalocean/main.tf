@@ -50,9 +50,12 @@ resource "template_file" "etcd_discovery_url" {
 }
 
 module "ca" {
-  source      = "../certs/ca"
-
-  organization = "${var.organization}"
+  source            = "github.com/Capgemini/tf_tls//ca"
+  organization      = "${var.organization}"
+  ca_count          = "${var.masters + var.workers}"
+  ip_addresses_list = "${concat(digitalocean_droplet.master.*.ipv4_address, digitalocean_droplet.worker.*.ipv4_address)}"
+  ssh_user          = "core"
+  ssh_private_key   = "${tls_private_key.ssh.private_key_pem}"
 }
 
 module "etcd_cert" {
@@ -62,7 +65,7 @@ module "etcd_cert" {
 }
 
 module "kube_apiserver_certs" {
-  source                = "github.com/Capgemini/tf_tls/kubernetes/apiserver"
+  source                = "github.com/Capgemini/tf_tls//kubernetes/apiserver"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   ip_addresses          = "${compact(digitalocean_droplet.master.*.ipv4_address)}"
@@ -74,7 +77,7 @@ module "kube_apiserver_certs" {
 }
 
 module "kube_worker_certs" {
-  source                = "github.com/Capgemini/tf_tls/kubernetes/worker"
+  source                = "github.com/Capgemini/tf_tls//kubernetes/worker"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   ip_addresses          = "${compact(digitalocean_droplet.worker.*.ipv4_address)}"
@@ -126,7 +129,6 @@ resource "template_file" "master_cloud_init" {
     etcd_ca            = "${replace(module.ca.ca_cert_pem, \"\n\", \"\\n\")}"
     etcd_cert          = "${replace(module.etcd_cert.etcd_cert_pem, \"\n\", \"\\n\")}"
     etcd_key           = "${replace(module.etcd_cert.etcd_private_key, \"\n\", \"\\n\")}"
-    kubernetes_ca      = "${replace(module.ca.ca_cert_pem, \"\n\", \"\\n\")}"
   }
 }
 
@@ -140,7 +142,6 @@ resource "template_file" "worker_cloud_init" {
     etcd_ca            = "${replace(module.ca.ca_cert_pem, \"\n\", \"\\n\")}"
     etcd_cert          = "${replace(module.etcd_cert.etcd_cert_pem, \"\n\", \"\\n\")}"
     etcd_key           = "${replace(module.etcd_cert.etcd_private_key, \"\n\", \"\\n\")}"
-    kubernetes_ca      = "${replace(module.ca.ca_cert_pem, \"\n\", \"\\n\")}"
   }
 }
 

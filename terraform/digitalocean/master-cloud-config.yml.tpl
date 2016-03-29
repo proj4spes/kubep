@@ -69,8 +69,5 @@ write_files:
   - path: /etc/ssl/etcd/private/etcd.pem
     permissions: 0644
     content: "${etcd_key}"
-  - path: /etc/kubernetes/ssl/ca.pem
-    permissions: 0644
-    content: "${kubernetes_ca}"
 manage_etc_hosts: localhost
 role: masters
