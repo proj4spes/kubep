@@ -78,3 +78,9 @@ enable_dashboard: true
 
 # DNS domain for SkyDNS + Kubelet
 dns_domain: cluster.local
+
+# remote cluster kubectl. kubectl is installed on each master so we can point
+# to localhost
+kubectl_endpoint: 127.0.0.1
+kubectl_username: root
+kubectl_password: changeme

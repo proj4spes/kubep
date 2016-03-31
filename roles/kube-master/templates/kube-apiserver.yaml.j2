@@ -3,6 +3,9 @@ kind: Pod
 metadata:
   name: kube-apiserver
   namespace: kube-system
+  labels:
+    failure-domain.beta.kubernetes.io/region: {{ region }}
+    failure-domain.beta.kubernetes.io/zone: {{ zone }}
 spec:
   hostNetwork: true
   containers:

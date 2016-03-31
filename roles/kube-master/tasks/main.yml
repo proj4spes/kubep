@@ -1,3 +1,9 @@
+# provider is set in the inventory
+- include_vars: "{{ item }}"
+  with_first_found:
+   - "{{ provider }}.yml"
+   - "default.yml"
+
 - name: create kubernetes dirs
   file:
     path: "{{ item }}"
@@ -74,6 +80,8 @@
       dest: "{{ kubernetes_manifest_dir }}/kube-apiserver.yaml"
     - src: kube-podmaster.yaml.j2
       dest: "{{ kubernetes_manifest_dir }}/kube-podmaster.yaml"
+    - src: kube-system.yaml
+      dest: "{{ kubernetes_manifest_dir }}/kube-system.yaml"
     - src: kube-controller-manager.yaml.j2
       dest: "{{ kubernetes_podmaster_dir }}/kube-controller-manager.yaml"
     - src: kube-scheduler.yaml.j2
@@ -87,11 +95,14 @@
   tags:
     - kube-master
 
-# @todo change this to the uri module once ansible 2.1 is stable.
 - name: create kube-system namespace
   become: yes
-  command: >
-    curl -XPOST -d'{"apiVersion":"v1","kind":"Namespace","metadata":{"name":"kube-system"}}' "http://127.0.0.1:8080/api/v1/namespaces"
+  kubernetes:
+    api_endpoint: "{{ kubectl_endpoint }}"
+    url_username: "{{ kubectl_username }}"
+    url_password: "{{ kubectl_password }}"
+    file_reference: "{{ kubernetes_manifest_dir }}/kube-system.yaml"
+    state: present
   run_once: true
   tags:
     - kube-master
