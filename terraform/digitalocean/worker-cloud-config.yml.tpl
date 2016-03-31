@@ -1,5 +1,4 @@
 #cloud-config
-
 coreos:
   etcd2:
     proxy: on
@@ -45,7 +44,6 @@ coreos:
             After=flanneld.service
             Requires=flanneld.service
             Restart=always
-            Restart=on-failure
     - name: etcd2.service
       command: start
   update:

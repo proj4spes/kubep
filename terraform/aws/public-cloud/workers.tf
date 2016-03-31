@@ -43,8 +43,6 @@ resource "aws_instance" "worker" {
     volume_size           = "${var.worker_ebs_volume_size}"
     delete_on_termination = true
   }
-  # Do some early bootstrapping of the CoreOS machines. This will install
-  # python and pip so we can use as the ansible_python_interpreter in our playbooks
   connection {
     user                = "core"
     private_key         = "${tls_private_key.ssh.private_key_pem}"

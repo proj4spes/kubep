@@ -1,5 +1,4 @@
 #cloud-config
-
 coreos:
   etcd2:
     proxy: on
@@ -59,18 +58,20 @@ coreos:
         Where=/var/lib/docker
         Type=ext4
     - name: docker.service
+      command: start
       drop-ins:
         - name: 10-wait-docker.conf
           content: |
             [Unit]
             After=var-lib-docker.mount
-            Requires=var-lib-docker.mount
             After=flanneld.service
-            Requires=flanneld.service
+            Requires=flanneld.Service
+            Requires=var-lib-docker.mount
             Restart=always
-            Restart=on-failure
     - name: etcd2.service
       command: start
+  update:
+    reboot-strategy: best-effort
 write_files:
   - path: /run/systemd/system/etcd.service.d/30-certificates.conf
     permissions: 0644
@@ -91,6 +92,4 @@ write_files:
   - path: /etc/ssl/etcd/private/etcd.pem
     permissions: 0644
     content: "${etcd_key}"
-  update:
-    reboot-strategy: best-effort
 manage_etc_hosts: localhost
