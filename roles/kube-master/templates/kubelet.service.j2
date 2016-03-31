@@ -12,7 +12,8 @@ Environment=KUBELET_VERSION={{ kubernetes_version }}
 # On upgrade we can --register-node=true --register-schedulable=false
 ExecStart=/opt/bin/kubelet-wrapper \
   --api-servers=http://127.0.0.1:8080 \
-  --register-node=false \
+  --register-node=true \
+  --register-schedulable=false \
   --allow-privileged=true \
   --config=/etc/kubernetes/manifests \
   --hostname-override=${COREOS_PRIVATE_IPV4} \

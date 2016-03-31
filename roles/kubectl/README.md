@@ -11,7 +11,7 @@ Requirements
 Role Variables
 --------------
 ```
-kubectl_version: 'v1.1.8'
+kubectl_version: 'v1.2.0'
 kubectl_url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
 kubectl_bin: '/opt/bin/kubectl'
 kubectl_certificate_authority: '/etc/kubernetes/ssl/ca.pem'
