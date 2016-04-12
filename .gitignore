@@ -12,7 +12,8 @@ vendor
 .kitchen
 terraform/**/.terraform
 roles/coreos_timezone
-/_book/
 _builds
 _projects
 _steps
+_book
+node_modules
