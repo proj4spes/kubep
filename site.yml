@@ -33,3 +33,5 @@
 - hosts: workers
   roles:
     - kube-worker
+
+- include: helm.yml

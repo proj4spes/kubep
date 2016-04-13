@@ -1,0 +1,23 @@
+---
+- name: install helm
+  become: yes
+  become_user: root
+  command: "curl -s {{ helm_url }} | bash"
+  args:
+    chdir: "{{ helm_folder }}"
+    creates: "{{ helm_bin }}"
+  environment: "{{ proxy_env }}"
+  tags:
+    - helm
+
+- name: install helm packages
+  become: yes
+  become_user: root
+  run_once: True
+  when: "helm_{{ item.name }}_enabled | bool"
+  command: "helm install {{ item.repo }}"
+  environment: "{{ proxy_env }}"
+  with_items:
+    - "{{ helm_packages_list }}"
+  tags:
+    - helm
