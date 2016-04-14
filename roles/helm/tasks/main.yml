@@ -1,11 +1,11 @@
 ---
-- name: install helm
+- name: download and install helm
   become: yes
   become_user: root
-  command: "curl -s {{ helm_url }} | bash"
-  args:
-    chdir: "{{ helm_folder }}"
-    creates: "{{ helm_bin }}"
+  unarchive:
+    src: "{{ helm_url }}"
+    dest: "{{ helm_folder }}"
+    copy: no
   environment: "{{ proxy_env }}"
   tags:
     - helm

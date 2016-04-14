@@ -11,12 +11,10 @@ Requirements
 Role Variables
 --------------
 ```
-helm_url: " https://get.helm.sh "
+helm_url: "https://bintray.com/artifact/download/deis/helm/helm-0.5.0%2B1689ee4-linux-amd64.zip"
 helm_folder: "/opt/bin"
-helm_bin: "{{ helm_folder }}/helm"
 helm_deis_enabled: false
 helm_packages_list:
-	- { name: deis, repo: deis/workflow }
-
+  - { name: deis, repo: deis/workflow }
 ```
 
