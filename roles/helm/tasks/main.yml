@@ -1,0 +1,35 @@
+---
+- name: download and install helm
+  become: yes
+  become_user: root
+  unarchive:
+    src: "{{ helm_url }}"
+    dest: "{{ helm_folder }}"
+    copy: no
+  environment: "{{ proxy_env }}"
+  tags:
+    - helm
+
+- name: install helm packages
+  become: yes
+  become_user: root
+  run_once: True
+  when: "helm_{{ item.name }}_enabled | bool"
+  command: "helm install {{ item.repo }}"
+  environment: "{{ proxy_env }}"
+  with_items:
+    - "{{ helm_packages_list }}"
+  tags:
+    - helm
+
+- name: uninstall helm packages
+  become: yes
+  become_user: root
+  run_once: True
+  when: "not helm_{{ item.name }}_enabled | bool"
+  command: "helm uninstall {{ item.repo }}"
+  environment: "{{ proxy_env }}"
+  with_items:
+    - "{{ helm_packages_list }}"
+  tags:
+    - helm
