@@ -97,11 +97,10 @@
 
 - name: create kube-system namespace
   become: yes
-  kubernetes:
-    api_endpoint: "{{ kubectl_endpoint }}"
-    url_username: "{{ kubectl_username }}"
-    url_password: "{{ kubectl_password }}"
-    file_reference: "{{ kubernetes_manifest_dir }}/kube-system.yaml"
+  kube:
+    resource: namespace
+    name: kube-system
+    filename: "{{ kubernetes_manifest_dir }}/kube-system.yaml"
     state: present
   run_once: true
   tags:

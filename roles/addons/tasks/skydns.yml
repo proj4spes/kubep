@@ -20,11 +20,11 @@
 
 - name: Create SkyDNS replication controller
   become: yes
-  kubernetes:
-    api_endpoint: "{{ kubectl_endpoint }}"
-    url_username: "{{ kubectl_username }}"
-    url_password: "{{ kubectl_password }}"
-    file_reference: "{{ kubernetes_manifest_dir }}/skydns-rc.yaml"
+  kube:
+    resource: rc
+    name: kube-dns-v9
+    namespace: kube-system
+    filename: "{{ kubernetes_manifest_dir }}/skydns-rc.yaml"
     state: present
   tags:
     - addons
@@ -32,11 +32,11 @@
 
 - name: Create SkyDNS service
   become: yes
-  kubernetes:
-    api_endpoint: "{{ kubectl_endpoint }}"
-    url_username: "{{ kubectl_username }}"
-    url_password: "{{ kubectl_password }}"
-    file_reference: "{{ kubernetes_manifest_dir }}/skydns-svc.yaml"
+  kube:
+    resource: svc
+    name: kube-dns
+    namespace: kube-system
+    filename: "{{ kubernetes_manifest_dir }}/skydns-svc.yaml"
     state: present
   tags:
     - addons
