@@ -22,7 +22,7 @@
   become: yes
   kube:
     resource: rc
-    name: kubernetes-dashboard-canary
+    name: kubernetes-dashboard
     namespace: kube-system
     filename: "{{ kubernetes_manifest_dir }}/dashboard-rc.yaml"
     state: present
@@ -34,7 +34,7 @@
   become: yes
   kube:
     resource: svc
-    name: dashboard-canary
+    name: kubernetes-dashboard
     namespace: kube-system
     filename: "{{ kubernetes_manifest_dir }}/dashboard-svc.yaml"
     state: present

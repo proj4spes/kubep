@@ -2,8 +2,9 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: kubernetes-dashboard-canary
-  name: dashboard-canary
+    app: kubernetes-dashboard
+    kubernetes.io/cluster-service: "true"
+  name: kubernetes-dashboard
   namespace: kube-system
 spec:
   type: NodePort
@@ -11,4 +12,4 @@ spec:
   - port: 80
     targetPort: 9090
   selector:
-    app: kubernetes-dashboard-canary
+    app: kubernetes-dashboard
