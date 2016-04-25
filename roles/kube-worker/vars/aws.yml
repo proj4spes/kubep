@@ -1,2 +1,2 @@
-region: "{{ hostvars[inventory_hostname].tags.region }}"
-zone: "{{ hostvars[inventory_hostname].availability_zone }}"
+cloud_provider: aws
+enable_cloud_provider: true

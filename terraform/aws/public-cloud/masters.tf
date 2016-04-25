@@ -24,14 +24,15 @@ resource "template_file" "master_cloud_init" {
 }
 
 resource "aws_instance" "master" {
-  instance_type     = "${var.master_instance_type}"
-  ami               = "${module.master_ami.ami_id}"
-  count             = "${var.masters}"
-  key_name          = "${module.aws-keypair.keypair_name}"
-  subnet_id         = "${element(split(",", module.public_subnet.subnet_ids), count.index)}"
-  source_dest_check = false
-  security_groups   = ["${module.sg-default.security_group_id}"]
-  user_data         = "${template_file.master_cloud_init.rendered}"
+  instance_type        = "${var.master_instance_type}"
+  ami                  = "${module.master_ami.ami_id}"
+  iam_instance_profile = "${module.iam.master_profile_name}"
+  count                = "${var.masters}"
+  key_name             = "${module.aws-keypair.keypair_name}"
+  subnet_id            = "${element(split(",", module.public_subnet.subnet_ids), count.index)}"
+  source_dest_check    = false
+  security_groups      = ["${module.sg-default.security_group_id}"]
+  user_data            = "${template_file.master_cloud_init.rendered}"
   tags = {
     Name   = "kube-master-${count.index}"
     role   = "masters"

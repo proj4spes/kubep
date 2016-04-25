@@ -145,6 +145,11 @@ module "sg-default" {
   vpc_id = "${aws_vpc.default.id}"
 }
 
+# IAM roles + profiles
+module "iam" {
+  source = "../iam"
+}
+
 /*module "elb" {
   source = "../elb"
 

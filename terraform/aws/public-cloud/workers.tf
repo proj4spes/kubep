@@ -24,15 +24,16 @@ resource "template_file" "worker_cloud_init" {
 }
 
 resource "aws_instance" "worker" {
-  instance_type     = "${var.worker_instance_type}"
-  ami               = "${module.worker_ami.ami_id}"
-  count             = "${var.workers}"
-  key_name          = "${module.aws-keypair.keypair_name}"
-  subnet_id         = "${element(split(",", module.public_subnet.subnet_ids), count.index)}"
-  source_dest_check = false
-  security_groups   = ["${module.sg-default.security_group_id}"]
-  depends_on        = ["aws_instance.master"]
-  user_data         = "${template_file.worker_cloud_init.rendered}"
+  instance_type        = "${var.worker_instance_type}"
+  ami                  = "${module.worker_ami.ami_id}"
+  iam_instance_profile = "${module.iam.worker_profile_name}"
+  count                = "${var.workers}"
+  key_name             = "${module.aws-keypair.keypair_name}"
+  subnet_id            = "${element(split(",", module.public_subnet.subnet_ids), count.index)}"
+  source_dest_check    = false
+  security_groups      = ["${module.sg-default.security_group_id}"]
+  depends_on           = ["aws_instance.master"]
+  user_data            = "${template_file.worker_cloud_init.rendered}"
   tags = {
     Name   = "kube-worker-${count.index}"
     role   = "workers"

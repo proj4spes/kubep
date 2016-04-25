@@ -3,9 +3,6 @@ kind: Pod
 metadata:
   name: kube-controller-manager
   namespace: kube-system
-  labels:
-    failure-domain.beta.kubernetes.io/region: {{ region }}
-    failure-domain.beta.kubernetes.io/zone: {{ zone }}
 spec:
   containers:
   - name: kube-controller-manager
