@@ -56,3 +56,17 @@ resource "aws_instance" "master" {
     ]
   }
 }
+
+module "master-elb" {
+  source          = "../elb"
+  security_groups = "${module.sg-default.security_group_id}"
+  instances       = "${compact(aws_instance.master.*.id)}"
+  subnets         = "${compact(aws_instance.master.*.subnet_id)}"
+}
+
+output "master_ips" {
+  value = "${join(",", aws_instance.master.*.public_ip)}"
+}
+output "master_elb_hostname" {
+  value = "${module.master-elb.elb_dns_name}"
+}

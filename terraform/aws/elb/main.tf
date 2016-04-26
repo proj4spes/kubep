@@ -1,26 +1,16 @@
-variable "elb_name" { default = "kubeform-elb" }
-variable "backend_port" { default = "80"}
-variable "backend_protocol" { default = "http" }
-variable "health_check_target" { default = "HTTP:8888/health" }
+variable "elb_name" { default = "kube-master" }
+variable "health_check_target" { default = "HTTP:8080/healthz" }
 variable "instances" {}
 variable "subnets" {}
 variable "security_groups" {}
 
-resource "aws_elb" "elb" {
+resource "aws_elb" "kube_master" {
   name                      = "${var.elb_name}"
+  subnets                   = ["${var.subnets}"]
+  security_groups           = ["${var.security_groups}"]
+  instances                 = ["${var.instances}"]
   cross_zone_load_balancing = true
-  subnets                   = ["${split(\",\", var.subnets)}"]
-  security_groups           = ["${split(\",\",var.security_groups)}"]
-  instances                 = ["${split(\",\", var.instances)}"]
 
-  listener {
-    instance_port     = "${var.backend_port}"
-    instance_protocol = "${var.backend_protocol}"
-    lb_port           = 80
-    lb_protocol       = "http"
-  }
-
-  # Traefik health check
   health_check {
     healthy_threshold   = 2
     unhealthy_threshold = 2
@@ -29,17 +19,33 @@ resource "aws_elb" "elb" {
     interval            = 30
   }
 
+  listener {
+    instance_port     = 443
+    instance_protocol = "tcp"
+    lb_port           = 443
+    lb_protocol       = "tcp"
+  }
+
+  listener {
+    instance_port     = 80
+    instance_protocol = "tcp"
+    lb_port           = 80
+    lb_protocol       = "tcp"
+  }
+
+  listener {
+    instance_port     = 8080
+    instance_protocol = "tcp"
+    lb_port           = 8080
+    lb_protocol       = "tcp"
+  }
+
   tags {
     Name = "${var.elb_name}"
   }
 }
 
-resource "aws_proxy_protocol_policy" "http" {
-  load_balancer = "${aws_elb.elb.name}"
-  instance_ports = ["80"]
-}
-
 # outputs
-output "elb_id" { value = "${aws_elb.elb.id}" }
-output "elb_name" { value = "${aws_elb.elb.name}" }
-output "elb_dns_name" { value = "${aws_elb.elb.dns_name}" }
+output "elb_id" { value = "${aws_elb.kube_master.id}" }
+output "elb_name" { value = "${aws_elb.kube_master.name}" }
+output "elb_dns_name" { value = "${aws_elb.kube_master.dns_name}" }

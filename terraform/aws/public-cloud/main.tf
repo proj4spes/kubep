@@ -42,8 +42,8 @@ resource "null_resource" "keys" {
 }
 
 module "aws-keypair" {
-  source              = "../keypair"
-  public_key          = "${tls_private_key.ssh.public_key_openssh}"
+  source     = "../keypair"
+  public_key = "${tls_private_key.ssh.public_key_openssh}"
 }
 
 # certificates
@@ -51,7 +51,6 @@ module "ca" {
   source            = "github.com/Capgemini/tf_tls/ca"
   organization      = "${var.organization}"
   ca_count          = "${var.masters + var.workers}"
-  ip_addresses_list = "${concat(aws_instance.master.*.public_ip, aws_instance.master.*.private_ip, aws_instance.worker.*.private_ip)}"
   deploy_ssh_hosts  = "${concat(aws_instance.master.*.public_ip, aws_instance.worker.*.public_ip)}"
   ssh_user          = "core"
   ssh_private_key   = "${tls_private_key.ssh.private_key_pem}"
@@ -145,18 +144,10 @@ module "sg-default" {
   vpc_id = "${aws_vpc.default.id}"
 }
 
-# IAM roles + profiles
+# IAM
 module "iam" {
   source = "../iam"
 }
-
-/*module "elb" {
-  source = "../elb"
-
-  security_groups = "${module.sg-default.security_group_id}"
-  instances       = "${join(\",\", aws_instance.worker.*.id)}"
-  subnets         = "${module.public_subnet.subnet_ids}"
-}*/
 
 # Generate an etcd URL for the cluster
 resource "template_file" "etcd_discovery_url" {
@@ -169,14 +160,3 @@ resource "template_file" "etcd_discovery_url" {
     size = "${var.masters}"
   }
 }
-
-# outputs
-output "master_ips" {
-  value = "${join(",", aws_instance.master.*.public_ip)}"
-}
-output "worker_ips" {
-  value = "${join(",", aws_instance.worker.*.public_ip)}"
-}
-/*output "elb.hostname" {
-  value = "${module.elb.elb_dns_name}"
-}*/
