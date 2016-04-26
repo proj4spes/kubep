@@ -26,8 +26,8 @@
 
 - hosts: masters
   roles:
-    - kube-master
     - kubectl
+    - kube-master
     - addons
 
 - hosts: workers

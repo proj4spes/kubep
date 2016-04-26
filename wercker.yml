@@ -9,7 +9,6 @@ build:
     - capgemini/ansible-lint:
         name: run ansible-lint against the site.yml playbook
         playbook: site.yml
-        options: "--exclude=roles/kube-master/tasks/main.yml"
     - capgemini/terraform-install:
         version: 0.6.12
     - script:

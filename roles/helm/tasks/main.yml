@@ -12,10 +12,9 @@
 
 - name: install helm packages
   become: yes
-  become_user: root
-  run_once: True
+  run_once: true
   when: "helm_{{ item.name }}_enabled | bool"
-  command: "helm install {{ item.repo }}"
+  command: "helm install {{ item.repo }} --namespace {{ item.namespace }}"
   environment: "{{ proxy_env }}"
   with_items:
     - "{{ helm_packages_list }}"
@@ -24,10 +23,9 @@
 
 - name: uninstall helm packages
   become: yes
-  become_user: root
-  run_once: True
+  run_once: true
   when: "not helm_{{ item.name }}_enabled | bool"
-  command: "helm uninstall {{ item.repo }}"
+  command: "helm uninstall {{ item.repo }} --namespace {{ item.namespace }}"
   environment: "{{ proxy_env }}"
   with_items:
     - "{{ helm_packages_list }}"

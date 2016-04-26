@@ -1,4 +1,9 @@
-# config
+# provider is set in the inventory
+- include_vars: "{{ item }}"
+  with_first_found:
+   - "{{ provider }}.yml"
+   - "default.yml"
+
 - name: create kubernetes dirs
   file:
     path: "{{ item }}"

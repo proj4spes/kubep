@@ -1,1 +1,4 @@
+id_rsa
+id_rsa.pub
 etcd_discovery_url.txt
+*.pem

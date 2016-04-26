@@ -8,6 +8,3 @@ is_first_master: "{% if inventory_hostname == groups['masters'][0] %}true{% else
 dns_replicas: 1
 
 kubectl_bin: /opt/bin/kubectl
-kubectl_endpoint: 127.0.0.1
-kubectl_username: root
-kubectl_password: changeme

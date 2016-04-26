@@ -11,7 +11,7 @@ spec:
     command:
     - /hyperkube
     - apiserver
-    - --bind-address=0.0.0.0
+    - --bind-address={{ kube_apiserver_bind_address }}
     - --etcd-servers={{ kube_etcd_servers }}
     - --allow-privileged=true
     - --service-cluster-ip-range={{ kubernetes_service_ip_range }}
