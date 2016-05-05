@@ -67,6 +67,7 @@ module "kube_apiserver_certs" {
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   ip_addresses          = "${concat(aws_instance.master.*.private_ip, aws_instance.master.*.public_ip)}"
+  dns_names             = "${compact(module.master_elb.elb_dns_name)}"
   deploy_ssh_hosts      = "${compact(aws_instance.master.*.public_ip)}"
   master_count          = "${var.masters}"
   validity_period_hours = "8760"
@@ -92,7 +93,7 @@ module "kube_admin_cert" {
   source                = "github.com/Capgemini/tf_tls/kubernetes/admin"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
-  kubectl_server_ip     = "${aws_instance.master.0.public_ip}"
+  kubectl_server_ip     = "${module.master_elb.elb_dns_name}"
 }
 
 module "docker_daemon_certs" {
