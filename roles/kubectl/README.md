@@ -22,8 +22,8 @@ kubectl_context_user: 'default-cluster'
 kubectl_context_name: 'default-system'
 kubectl_context_current: 'default-system'
 kubectl_users_name: 'default-admin'
-kubectl_client_certificate: '/etc/kubernetes/ssl/apiserver.pem'
-kubectl_client_key: '/etc/kubernetes/ssl/apiserver-key.pem'
+kubectl_client_certificate: '/etc/kubernetes/ssl/master.pem'
+kubectl_client_key: '/etc/kubernetes/ssl/master-key.pem'
 
 
 ```

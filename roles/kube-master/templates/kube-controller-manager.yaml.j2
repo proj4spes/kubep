@@ -11,7 +11,7 @@ spec:
     - /hyperkube
     - controller-manager
     - --master=http://127.0.0.1:8080
-    - --service-account-private-key-file={{ kubernetes_cert_dir }}/apiserver-key.pem
+    - --service-account-private-key-file={{ kubernetes_cert_dir }}/master-key.pem
     - --root-ca-file={{ kubernetes_cert_dir }}/ca.pem
     - --v={{ kubernetes_log_level }}
     livenessProbe:

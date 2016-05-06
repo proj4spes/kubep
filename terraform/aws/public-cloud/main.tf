@@ -62,8 +62,8 @@ module "etcd_cert" {
   ca_private_key_pem = "${module.ca.ca_private_key_pem}"
 }
 
-module "kube_apiserver_certs" {
-  source                = "github.com/Capgemini/tf_tls/kubernetes/apiserver"
+module "kube_master_certs" {
+  source                = "github.com/Capgemini/tf_tls/kubernetes/master"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   ip_addresses          = "${concat(aws_instance.master.*.private_ip, aws_instance.master.*.public_ip)}"
@@ -76,13 +76,13 @@ module "kube_apiserver_certs" {
   ssh_private_key       = "${tls_private_key.ssh.private_key_pem}"
 }
 
-module "kube_worker_certs" {
-  source                = "github.com/Capgemini/tf_tls/kubernetes/worker"
+module "kube_kubelet_certs" {
+  source                = "github.com/Capgemini/tf_tls/kubernetes/kubelet"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
-  ip_addresses          = "${compact(aws_instance.worker.*.private_ip)}"
-  deploy_ssh_hosts      = "${compact(aws_instance.worker.*.public_ip)}"
-  worker_count          = "${var.workers}"
+  ip_addresses          = "${concat(aws_instance.worker.*.private_ip, aws_instance.master.*.private_ip)}"
+  deploy_ssh_hosts      = "${concat(aws_instance.worker.*.public_ip, aws_instance.master.*.public_ip)}"
+  kubelet_count         = "${var.masters + var.workers}"
   validity_period_hours = "8760"
   early_renewal_hours   = "720"
   ssh_user              = "core"

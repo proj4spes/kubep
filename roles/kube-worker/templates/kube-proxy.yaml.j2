@@ -12,7 +12,7 @@ spec:
     - /hyperkube
     - proxy
     - --master={{ kube_master }}
-    - --kubeconfig={{ kubernetes_config_dir }}/worker-kubeconfig.yaml
+    - --kubeconfig={{ kubernetes_config_dir }}/worker-kubeconfig
     - --proxy-mode=iptables
     - --v={{ kubernetes_log_level }}
     securityContext:
@@ -20,7 +20,7 @@ spec:
     volumeMounts:
       - mountPath: /etc/ssl/certs
         name: "ssl-certs"
-      - mountPath: {{ kubernetes_config_dir }}/worker-kubeconfig.yaml
+      - mountPath: {{ kubernetes_config_dir }}/worker-kubeconfig
         name: "kubeconfig"
         readOnly: true
       - mountPath: {{ kubernetes_cert_dir }}
@@ -32,7 +32,7 @@ spec:
         path: "/usr/share/ca-certificates"
     - name: "kubeconfig"
       hostPath:
-        path: "{{ kubernetes_config_dir }}/worker-kubeconfig.yaml"
+        path: "{{ kubernetes_config_dir }}/worker-kubeconfig"
     - name: "etc-kube-ssl"
       hostPath:
         path: "{{ kubernetes_cert_dir }}"

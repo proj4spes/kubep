@@ -55,8 +55,8 @@
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
   with_items:
-    - src: worker-kubeconfig.yaml.j2
-      dest: "{{ kubernetes_config_dir }}/worker-kubeconfig.yaml"
+    - src: worker-kubeconfig.j2
+      dest: "{{ kubernetes_config_dir }}/worker-kubeconfig"
     - src: kube-proxy.yaml.j2
       dest: "{{ kubernetes_manifest_dir }}/kube-proxy.yaml"
   tags:
