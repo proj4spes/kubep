@@ -11,17 +11,20 @@ spec:
     command:
     - /hyperkube
     - apiserver
-    - --bind-address={{ kube_apiserver_bind_address }}
-    - --etcd-servers={{ kube_etcd_servers }}
     - --allow-privileged=true
+    - --apiserver-count={{ kube_apiserver_count }}
+    - --bind-address={{ kube_apiserver_bind_address }}
+    - --insecure-bind-address=0.0.0.0
+    - --etcd-servers={{ kube_etcd_servers }}
     - --service-cluster-ip-range={{ kubernetes_service_ip_range }}
     - --secure-port=443
+    - --insecure_port=8080
     - --advertise-address={{ ansible_default_ipv4.address }}
     - --admission-control=NamespaceLifecycle,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
-    - --tls-cert-file={{ kubernetes_cert_dir }}/apiserver.pem
-    - --tls-private-key-file={{ kubernetes_cert_dir }}/apiserver-key.pem
+    - --tls-cert-file={{ kubernetes_cert_dir }}/master.pem
+    - --tls-private-key-file={{ kubernetes_cert_dir }}/master-key.pem
     - --client-ca-file={{ kubernetes_cert_dir }}/ca.pem
-    - --service-account-key-file={{ kubernetes_cert_dir }}/apiserver-key.pem
+    - --service-account-key-file={{ kubernetes_cert_dir }}/master-key.pem
     - --basic-auth-file={{ kubernetes_users_dir }}/known_users.csv
     - --runtime-config=extensions/v1beta1/deployments=true,extensions/v1beta1/daemonsets=true
     - --v={{ kubernetes_log_level }}

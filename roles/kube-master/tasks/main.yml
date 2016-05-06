@@ -86,6 +86,11 @@
       dest: "{{ kubernetes_podmaster_dir }}/kube-controller-manager.yaml"
     - src: kube-scheduler.yaml.j2
       dest: "{{ kubernetes_podmaster_dir }}/kube-scheduler.yaml"
+    - src: master-kubeconfig.j2
+      dest: "{{ kubernetes_config_dir }}/master-kubeconfig"
+  notify:
+    - reload systemd
+    - restart kubelet
   tags:
     - kube-master
 

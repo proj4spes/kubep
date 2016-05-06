@@ -42,8 +42,8 @@ resource "null_resource" "keys" {
 }
 
 module "aws-keypair" {
-  source              = "../keypair"
-  public_key          = "${tls_private_key.ssh.public_key_openssh}"
+  source     = "../keypair"
+  public_key = "${tls_private_key.ssh.public_key_openssh}"
 }
 
 # certificates
@@ -51,7 +51,6 @@ module "ca" {
   source            = "github.com/Capgemini/tf_tls/ca"
   organization      = "${var.organization}"
   ca_count          = "${var.masters + var.workers}"
-  ip_addresses_list = "${concat(aws_instance.master.*.public_ip, aws_instance.master.*.private_ip, aws_instance.worker.*.private_ip)}"
   deploy_ssh_hosts  = "${concat(aws_instance.master.*.public_ip, aws_instance.worker.*.public_ip)}"
   ssh_user          = "core"
   ssh_private_key   = "${tls_private_key.ssh.private_key_pem}"
@@ -63,11 +62,12 @@ module "etcd_cert" {
   ca_private_key_pem = "${module.ca.ca_private_key_pem}"
 }
 
-module "kube_apiserver_certs" {
-  source                = "github.com/Capgemini/tf_tls/kubernetes/apiserver"
+module "kube_master_certs" {
+  source                = "github.com/Capgemini/tf_tls/kubernetes/master"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   ip_addresses          = "${concat(aws_instance.master.*.private_ip, aws_instance.master.*.public_ip)}"
+  dns_names             = "${compact(module.master_elb.elb_dns_name)}"
   deploy_ssh_hosts      = "${compact(aws_instance.master.*.public_ip)}"
   master_count          = "${var.masters}"
   validity_period_hours = "8760"
@@ -76,13 +76,13 @@ module "kube_apiserver_certs" {
   ssh_private_key       = "${tls_private_key.ssh.private_key_pem}"
 }
 
-module "kube_worker_certs" {
-  source                = "github.com/Capgemini/tf_tls/kubernetes/worker"
+module "kube_kubelet_certs" {
+  source                = "github.com/Capgemini/tf_tls/kubernetes/kubelet"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
-  ip_addresses          = "${compact(aws_instance.worker.*.private_ip)}"
-  deploy_ssh_hosts      = "${compact(aws_instance.worker.*.public_ip)}"
-  worker_count          = "${var.workers}"
+  ip_addresses          = "${concat(aws_instance.worker.*.private_ip, aws_instance.master.*.private_ip)}"
+  deploy_ssh_hosts      = "${concat(aws_instance.worker.*.public_ip, aws_instance.master.*.public_ip)}"
+  kubelet_count         = "${var.masters + var.workers}"
   validity_period_hours = "8760"
   early_renewal_hours   = "720"
   ssh_user              = "core"
@@ -93,7 +93,7 @@ module "kube_admin_cert" {
   source                = "github.com/Capgemini/tf_tls/kubernetes/admin"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
-  kubectl_server_ip     = "${aws_instance.master.0.public_ip}"
+  kubectl_server_ip     = "${module.master_elb.elb_dns_name}"
 }
 
 module "docker_daemon_certs" {
@@ -145,18 +145,10 @@ module "sg-default" {
   vpc_id = "${aws_vpc.default.id}"
 }
 
-# IAM roles + profiles
+# IAM
 module "iam" {
   source = "../iam"
 }
-
-/*module "elb" {
-  source = "../elb"
-
-  security_groups = "${module.sg-default.security_group_id}"
-  instances       = "${join(\",\", aws_instance.worker.*.id)}"
-  subnets         = "${module.public_subnet.subnet_ids}"
-}*/
 
 # Generate an etcd URL for the cluster
 resource "template_file" "etcd_discovery_url" {
@@ -169,14 +161,3 @@ resource "template_file" "etcd_discovery_url" {
     size = "${var.masters}"
   }
 }
-
-# outputs
-output "master_ips" {
-  value = "${join(",", aws_instance.master.*.public_ip)}"
-}
-output "worker_ips" {
-  value = "${join(",", aws_instance.worker.*.public_ip)}"
-}
-/*output "elb.hostname" {
-  value = "${module.elb.elb_dns_name}"
-}*/
