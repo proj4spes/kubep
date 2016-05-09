@@ -19,20 +19,20 @@ spec:
       privileged: true
     volumeMounts:
       - mountPath: /etc/ssl/certs
-        name: "ssl-certs"
+        name: ssl-certs
       - mountPath: {{ kubernetes_config_dir }}/worker-kubeconfig
-        name: "kubeconfig"
+        name: kubeconfig
         readOnly: true
       - mountPath: {{ kubernetes_cert_dir }}
-        name: "etc-kube-ssl"
+        name: etc-kube-ssl
         readOnly: true
   volumes:
-    - name: "ssl-certs"
+    - name: ssl-certs
       hostPath:
-        path: "/usr/share/ca-certificates"
-    - name: "kubeconfig"
+        path: /usr/share/ca-certificates
+    - name: kubeconfig
       hostPath:
         path: "{{ kubernetes_config_dir }}/worker-kubeconfig"
-    - name: "etc-kube-ssl"
+    - name: etc-kube-ssl
       hostPath:
         path: "{{ kubernetes_cert_dir }}"

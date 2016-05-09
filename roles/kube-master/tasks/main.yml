@@ -13,6 +13,7 @@
     - "{{ kubernetes_config_dir }}"
     - "{{ kubernetes_script_dir }}"
     - "{{ kubernetes_podmaster_dir }}"
+    - "{{ kubernetes_addons_dir }}"
   become: yes
   tags:
     - kube-master
@@ -80,8 +81,6 @@
       dest: "{{ kubernetes_manifest_dir }}/kube-apiserver.yaml"
     - src: kube-podmaster.yaml.j2
       dest: "{{ kubernetes_manifest_dir }}/kube-podmaster.yaml"
-    - src: kube-system.yaml
-      dest: "{{ kubernetes_manifest_dir }}/kube-system.yaml"
     - src: kube-controller-manager.yaml.j2
       dest: "{{ kubernetes_podmaster_dir }}/kube-controller-manager.yaml"
     - src: kube-scheduler.yaml.j2
@@ -97,16 +96,5 @@
 - name: wait for kube-apiserver up
   wait_for:
     port: 8080
-  tags:
-    - kube-master
-
-- name: create kube-system namespace
-  become: yes
-  kube:
-    resource: namespace
-    name: kube-system
-    filename: "{{ kubernetes_manifest_dir }}/kube-system.yaml"
-    state: present
-  run_once: true
   tags:
     - kube-master
