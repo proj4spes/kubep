@@ -70,6 +70,7 @@ kubernetes_config_dir: /etc/kubernetes
 kubernetes_script_dir: /srv/kubernetes
 kubernetes_cert_dir: "{{ kubernetes_config_dir }}/ssl"
 kubernetes_manifest_dir: "{{ kubernetes_config_dir }}/manifests"
+kubernetes_addons_dir: "{{ kubernetes_config_dir }}/addons"
 kubernetes_users_dir: "{{ kubernetes_config_dir }}/users"
 kubernetes_podmaster_dir: "{{ kubernetes_script_dir }}/manifests"
 

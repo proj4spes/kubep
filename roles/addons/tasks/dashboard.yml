@@ -4,7 +4,7 @@
   become: yes
   copy:
     src: dashboard-rc.yaml
-    dest: "{{ kubernetes_manifest_dir }}/dashboard-rc.yaml"
+    dest: "{{ kubernetes_addons_dir }}/dashboard-rc.yaml"
   tags:
     - addons
     - dashboard
@@ -13,7 +13,7 @@
   become: yes
   copy:
     src: dashboard-svc.yaml
-    dest: "{{ kubernetes_manifest_dir }}/dashboard-svc.yaml"
+    dest: "{{ kubernetes_addons_dir }}/dashboard-svc.yaml"
   tags:
     - addons
     - dashboard
@@ -24,7 +24,7 @@
     resource: rc
     name: kubernetes-dashboard
     namespace: kube-system
-    filename: "{{ kubernetes_manifest_dir }}/dashboard-rc.yaml"
+    filename: "{{ kubernetes_addons_dir }}/dashboard-rc.yaml"
     state: present
   tags:
     - addons
@@ -36,7 +36,7 @@
     resource: svc
     name: kubernetes-dashboard
     namespace: kube-system
-    filename: "{{ kubernetes_manifest_dir }}/dashboard-svc.yaml"
+    filename: "{{ kubernetes_addons_dir }}/dashboard-svc.yaml"
     state: present
   tags:
     - addons
