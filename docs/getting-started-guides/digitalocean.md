@@ -26,7 +26,7 @@ Configuration can be set via environment variables. As a minimum you will need t
 
 ```
 export TF_VAR_do_token=$DO_API_TOKEN
-export TF_VAR_STATE_ROOT=~/kubeform/terraform/digitalocean
+export TF_VAR_STATE_ROOT=/tmp/kubeform/terraform/digitalocean
 ```
 
 ### Provision the cluster infrastructure

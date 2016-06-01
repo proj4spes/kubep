@@ -28,7 +28,7 @@ Configuration can be set via environment variables. As a minimum you will need t
 ```
 export TF_VAR_access_key=$AWS_ACCESS_KEY_ID
 export TF_VAR_secret_key=$AWS_SECRET_ACCESS_KEY
-export TF_VAR_STATE_ROOT=~/kubeform/terraform/aws/public-cloud
+export TF_VAR_STATE_ROOT=/tmp/kubeform/terraform/aws/public-cloud
 ```
 
 ### Provision the cluster infrastructure
@@ -50,7 +50,7 @@ ansible-galaxy install -r requirements.yml
 To run the Ansible playbook (to configure the cluster):
 
 ```
-ansible-playbook -u core --ssh-common-args="-F ~/kubeform/terraform/aws/public-cloud/ssh.config -i /tmp/kubeform/terraform/aws/public-cloud/id_rsa -q" --inventory-file=inventory site.yml -e kube_apiserver_vip=$(cd /tmp/kubeform/terraform/aws/public-cloud && terraform output master_elb_hostname)
+ansible-playbook -u core --ssh-common-args="-F /tmp/kubeform/terraform/aws/public-cloud/ssh.config -i /tmp/kubeform/terraform/aws/public-cloud/id_rsa -q" --inventory-file=inventory site.yml -e kube_apiserver_vip=$(cd /tmp/kubeform/terraform/aws/public-cloud && terraform output master_elb_hostname)
 ```
 
 This will run the playbook (using the credentials output by terraform and the terraform state as a dynamic inventory) and inject the AWS ELB (for the master API servers) address as a variable ```kube_apiserver_vip```.
