@@ -82,3 +82,9 @@ dns_domain: cluster.local
 
 # Toggle for cloud provider support for Kubelet
 enable_cloud_provider: false
+
+# Choose a specific ingress-controller. Supported:
+# - traefik
+# - nginx - Coming soon...
+# - vamp - Coming soon...
+ingress_controller: "traefik"
