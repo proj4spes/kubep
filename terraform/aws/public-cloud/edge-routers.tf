@@ -26,7 +26,7 @@ resource "template_file" "edge-router_cloud_init" {
 resource "aws_instance" "edge-router" {
   instance_type        = "${var.edge-router_instance_type}"
   ami                  = "${module.edge-router_ami.ami_id}"
-  // iam_instance_profile = "${module.iam.edge-router_profile_name}"
+  iam_instance_profile = "${module.iam.edge-router_profile_name}"
   count                = "${var.edge-routers}"
   key_name             = "${module.aws-keypair.keypair_name}"
   subnet_id            = "${element(split(",", module.public_subnet.subnet_ids), count.index)}"

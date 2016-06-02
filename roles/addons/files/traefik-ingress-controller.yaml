@@ -25,7 +25,7 @@ spec:
           hostPort: 8080
         volumeMounts:
           - mountPath: /etc/traefik
-            name: test-volume
+            name: traefik-volume
             readOnly: false
         args:
         - --web
@@ -35,6 +35,6 @@ spec:
       volumes:
         - hostPath:
             path: /etc/traefik
-          name: test-volume
+          name: traefik-volume
       nodeSelector:
         role: edge-router
