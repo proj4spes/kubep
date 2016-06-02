@@ -43,8 +43,8 @@ resource "aws_iam_role" "edge-router_role" {
 
 resource "aws_iam_role_policy" "edge-router_policy" {
   name   = "edge-router_policy"
-  role   = "${aws_iam_role.worker_role.id}"
-  policy = "${file(\"${path.module}/worker-policy.json\")}"
+  role   = "${aws_iam_role.edge-router_role.id}"
+  policy = "${file(\"${path.module}/edge-router-policy.json\")}"
 }
 
 resource "aws_iam_instance_profile" "edge-router_profile" {
