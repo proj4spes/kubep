@@ -24,7 +24,7 @@ and optionally -
 * Prometheus for cluster monitoring (coming soon!)
 * Fluentd, elasticsearch for cluster logging
 
-See our [Roadmap](https://github.com/Capgemini/kubeform/blob/master/docs/roadmap.md) for future features and feel free to help us improve the project
+See our [Roadmap](/docs/roadmap.md) for future features and feel free to help us improve the project
 by contributing a Pull Request, or raise an issue if you run into trouble!
 
 ## Getting started
