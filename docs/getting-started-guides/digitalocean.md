@@ -51,7 +51,6 @@ export TF_VAR_STATE_ROOT=/tmp/kubeform/terraform/digitalocean
 ```
 cd /tmp/kubeform/terraform/digitalocean
 terraform get
-for i in $(ls .terraform/modules/*/Makefile); do i=$(dirname $i); make -C $i; done
 ```
 
 ### Provision the cluster infrastructure
