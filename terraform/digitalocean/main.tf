@@ -3,8 +3,10 @@ variable "organization" { default = "kubeform" }
 variable "region" { default = "lon1" }
 variable "masters" { default = "3" }
 variable "workers" { default = "1" }
+variable "edge-routers" { default = "1" }
 variable "master_instance_type" { default = "512mb" }
 variable "worker_instance_type" { default = "512mb" }
+variable "edge-router_instance_type" { default = "512mb" }
 variable "etcd_discovery_url_file" { default = "etcd_discovery_url.txt" }
 
 /*
@@ -52,8 +54,8 @@ resource "template_file" "etcd_discovery_url" {
 module "ca" {
   source            = "github.com/Capgemini/tf_tls//ca"
   organization      = "${var.organization}"
-  ca_count          = "${var.masters + var.workers}"
-  ip_addresses_list = "${concat(digitalocean_droplet.master.*.ipv4_address, digitalocean_droplet.worker.*.ipv4_address)}"
+  ca_count          = "${var.masters + var.workers + var.edge-routers}"
+  deploy_ssh_hosts  = "${concat(digitalocean_droplet.edge-router.*.ipv4_address, concat(digitalocean_droplet.master.*.ipv4_address, digitalocean_droplet.worker.*.ipv4_address))}"
   ssh_user          = "core"
   ssh_private_key   = "${tls_private_key.ssh.private_key_pem}"
 }
@@ -64,11 +66,13 @@ module "etcd_cert" {
   ca_private_key_pem = "${module.ca.ca_private_key_pem}"
 }
 
-module "kube_apiserver_certs" {
-  source                = "github.com/Capgemini/tf_tls//kubernetes/apiserver"
+module "kube_master_certs" {
+  source                = "github.com/Capgemini/tf_tls/kubernetes/master"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   ip_addresses          = "${compact(digitalocean_droplet.master.*.ipv4_address)}"
+  deploy_ssh_hosts      = "${compact(digitalocean_droplet.master.*.ipv4_address)}"
+  dns_names             = "test"
   master_count          = "${var.masters}"
   validity_period_hours = "8760"
   early_renewal_hours   = "720"
@@ -76,12 +80,13 @@ module "kube_apiserver_certs" {
   ssh_private_key       = "${tls_private_key.ssh.private_key_pem}"
 }
 
-module "kube_worker_certs" {
-  source                = "github.com/Capgemini/tf_tls//kubernetes/worker"
+module "kube_kubelet_certs" {
+  source                = "github.com/Capgemini/tf_tls/kubernetes/kubelet"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
-  ip_addresses          = "${compact(digitalocean_droplet.worker.*.ipv4_address)}"
-  worker_count          = "${var.workers}"
+  ip_addresses          = "${concat( digitalocean_droplet.edge-router.*.ipv4_address, concat(digitalocean_droplet.master.*.ipv4_address, digitalocean_droplet.worker.*.ipv4_address))}"
+  deploy_ssh_hosts      = "${concat( digitalocean_droplet.edge-router.*.ipv4_address, concat(digitalocean_droplet.master.*.ipv4_address, digitalocean_droplet.worker.*.ipv4_address))}"
+  kubelet_count         = "${var.masters + var.workers + var.edge-routers}"
   validity_period_hours = "8760"
   early_renewal_hours   = "720"
   ssh_user              = "core"
@@ -99,8 +104,9 @@ module "docker_daemon_certs" {
   source                = "github.com/Capgemini/tf_tls//docker/daemon"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
-  ip_addresses_list     = "${concat(digitalocean_droplet.master.*.ipv4_address, digitalocean_droplet.worker.*.ipv4_address)}"
-  docker_daemon_count   = "${var.masters + var.workers}"
+  ip_addresses_list     = "${concat(digitalocean_droplet.edge-router.*.ipv4_address, concat(digitalocean_droplet.master.*.ipv4_address, digitalocean_droplet.worker.*.ipv4_address))}"
+  deploy_ssh_hosts      = "${concat(digitalocean_droplet.edge-router.*.ipv4_address, concat(digitalocean_droplet.master.*.ipv4_address, digitalocean_droplet.worker.*.ipv4_address))}"
+  docker_daemon_count   = "${var.masters + var.workers + var.edge-routers}"
   private_key           = "${tls_private_key.ssh.private_key_pem}"
   validity_period_hours = 8760
   early_renewal_hours   = 720
@@ -111,8 +117,9 @@ module "docker_client_certs" {
   source                = "github.com/Capgemini/tf_tls//docker/client"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
-  ip_addresses_list     = "${concat(digitalocean_droplet.master.*.ipv4_address, digitalocean_droplet.worker.*.ipv4_address)}"
-  docker_client_count   = "${var.masters + var.workers}"
+  ip_addresses_list     = "${concat(digitalocean_droplet.edge-router.*.ipv4_address, concat(digitalocean_droplet.master.*.ipv4_address, digitalocean_droplet.worker.*.ipv4_address))}"
+  deploy_ssh_hosts      = "${concat(digitalocean_droplet.edge-router.*.ipv4_address, concat(digitalocean_droplet.master.*.ipv4_address, digitalocean_droplet.worker.*.ipv4_address))}"
+  docker_client_count   = "${var.masters + var.workers + var.edge-routers}"
   private_key           = "${tls_private_key.ssh.private_key_pem}"
   validity_period_hours = 8760
   early_renewal_hours   = 720
@@ -134,6 +141,19 @@ resource "template_file" "master_cloud_init" {
 
 resource "template_file" "worker_cloud_init" {
   template   = "worker-cloud-config.yml.tpl"
+  depends_on = ["template_file.etcd_discovery_url"]
+  vars {
+    etcd_discovery_url = "${file(var.etcd_discovery_url_file)}"
+    size               = "${var.masters}"
+    region             = "${var.region}"
+    etcd_ca            = "${replace(module.ca.ca_cert_pem, \"\n\", \"\\n\")}"
+    etcd_cert          = "${replace(module.etcd_cert.etcd_cert_pem, \"\n\", \"\\n\")}"
+    etcd_key           = "${replace(module.etcd_cert.etcd_private_key, \"\n\", \"\\n\")}"
+  }
+}
+
+resource "template_file" "edge-router_cloud_init" {
+  template   = "edge-router-cloud-config.yml.tpl"
   depends_on = ["template_file.etcd_discovery_url"]
   vars {
     etcd_discovery_url = "${file(var.etcd_discovery_url_file)}"
@@ -212,10 +232,46 @@ resource "digitalocean_droplet" "worker" {
   }
 }
 
+# Edge-routers
+resource "digitalocean_droplet" "edge-router" {
+  image              = "${var.coreos_image}"
+  region             = "${var.region}"
+  count              = "${var.edge-routers}"
+  name               = "kube-edge-router-${count.index}"
+  size               = "${var.edge-router_instance_type}"
+  private_networking = true
+  user_data          = "${template_file.edge-router_cloud_init.rendered}"
+  ssh_keys = [
+    "${digitalocean_ssh_key.default.id}"
+  ]
+  # Do some early bootstrapping of the CoreOS machines. This will install
+  # python and pip so we can use as the ansible_python_interpreter in our playbooks
+  connection {
+    user                = "core"
+    private_key         = "${tls_private_key.ssh.private_key_pem}"
+  }
+  provisioner "file" {
+    source      = "../scripts/coreos"
+    destination = "/tmp"
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "sudo chmod -R +x /tmp/coreos",
+      "/tmp/coreos/bootstrap.sh",
+      "~/bin/python /tmp/coreos/get-pip.py",
+      "sudo mv /tmp/coreos/runner ~/bin/pip && sudo chmod 0755 ~/bin/pip",
+      "sudo rm -rf /tmp/coreos"
+    ]
+  }
+}
+
 # Outputs
 output "master_ips" {
   value = "${join(",", digitalocean_droplet.master.*.ipv4_address)}"
 }
 output "worker_ips" {
   value = "${join(",", digitalocean_droplet.worker.*.ipv4_address)}"
+}
+output "edge-router_ips" {
+  value = "${join(",", digitalocean_droplet.edge-router.*.ipv4_address)}"
 }
