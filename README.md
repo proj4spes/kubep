@@ -35,6 +35,10 @@ Check out the instructions for provisioning on different clouds including:
 * [Digitalocean](/docs/getting-started-guides/digitalocean.md)
 * [Local Docker Compose](/docs/getting-started-guides/docker-compose.md)
 
+## Demo
+
+[Check out this demo deploying and scaling the backends for the ingress-controller on AWS and DigitalOcean](https://www.youtube.com/watch?v=Ejc5rKTzHiQ)
+
 ## Keep up to date...
 
 Check out the [Capgemini UK Engineering blog](http://capgemini.github.io/) to find out more about the stuff we do!
