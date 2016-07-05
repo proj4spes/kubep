@@ -5,6 +5,9 @@ proxy_env:
   HTTP_PROXY: "{{ http_proxy }}"
   HTTPS_PROXY: "{{ http_proxy }}"
 
+# For baremetal or onpremise when not running terraform
+onpremise: false
+
 coreos_timezone: 'Europe/London'
 etcd_servers_group: etcd_servers
 api_servers_group: masters
