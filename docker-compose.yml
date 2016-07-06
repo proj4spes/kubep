@@ -27,7 +27,7 @@ services:
   kubelet:
     image: gcr.io/google_containers/hyperkube:v${KUBERNETES_VERSION}
     network_mode: host
-    command: ['/hyperkube', 'kubelet', '--containerized' , '--api_servers=http://127.0.0.1:8080', '--v=2', '--address=0.0.0.0', '--enable_server']
+    command: ['/hyperkube', 'kubelet', '--containerized' , '--api_servers=http://127.0.0.1:8080', '--allow-privileged', '--v=2', '--address=0.0.0.0', '--enable_server', '--hostname_override=127.0.0.1', '--config=/etc/kubernetes/manifests']
     volumes:
       - /:/rootfs:ro
       - /sys:/sys:ro
