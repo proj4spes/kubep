@@ -74,7 +74,7 @@ ansible-galaxy install -r requirements.yml
 To run the Ansible playbook (to configure the cluster):
 
 ```
-ansible-playbook -u core --ssh-common-args="-F /tmp/kubeform/terraform/aws/public-cloud/ssh.config -i /tmp/kubeform/terraform/aws/public-cloud/id_rsa -q" --inventory-file=inventory site.yml -e kube_apiserver_vip=$(cd /tmp/kubeform/terraform/aws/public-cloud && terraform output master_elb_hostname)
+ansible-playbook -u core --ssh-common-args="-i /tmp/kubeform/terraform/aws/public-cloud/id_rsa -q" --inventory-file=inventory site.yml -e kube_apiserver_vip=$(cd /tmp/kubeform/terraform/aws/public-cloud && terraform output master_elb_hostname)
 ```
 
 This will run the playbook (using the credentials output by terraform and the terraform state as a dynamic inventory) and inject the AWS ELB (for the master API servers) address as a variable ```kube_apiserver_vip```.

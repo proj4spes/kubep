@@ -71,7 +71,7 @@ ansible-galaxy install -r requirements.yml
 To run the Ansible playbook (to configure the cluster):
 
 ```
-ansible-playbook -u core --ssh-common-args="-F /tmp/kubeform/terraform/digitalocean/ssh.config -i /tmp/kubeform/terraform/digitalocean/id_rsa -q" --inventory-file=inventory site.yml
+ansible-playbook -u core --ssh-common-args="-i /tmp/kubeform/terraform/digitalocean/id_rsa -q" --inventory-file=inventory site.yml
 ```
 
 This will run the playbook (using the credentials output by terraform and the terraform state as a dynamic inventory).
