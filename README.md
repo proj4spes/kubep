@@ -23,6 +23,7 @@ and optionally -
 
 * Prometheus for cluster monitoring (coming soon!)
 * Fluentd, elasticsearch for cluster logging
+* [Traefik](https://docs.traefik.io/toml/#kubernetes-ingress-backend) as the ingress controller for the edge-routers. For configuring it to use [letsencrypt](https://letsencrypt.org/) you can [edit this file](https://github.com/Capgemini/kubeform/blob/master/roles/addons/files/traefik.toml).
 
 See our [Roadmap](/docs/roadmap.md) for future features and feel free to help us improve the project
 by contributing a Pull Request, or raise an issue if you run into trouble!

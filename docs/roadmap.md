@@ -35,7 +35,7 @@ Features
 Security
 --------
 - [ ] Certs for all services
-- [ ] Lets encrypt support
+- [x] Lets encrypt support
 - [ ] IAM (IaaS & Platform)
 - [ ] Network policies support
 - [ ] Vault
