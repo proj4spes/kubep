@@ -1,10 +1,10 @@
 ---
 # create kubernetes-dashboard
-- name: create dashboard pod file
+- name: create dashboard deployment file
   become: yes
   copy:
-    src: dashboard-rc.yaml
-    dest: "{{ kubernetes_addons_dir }}/dashboard-rc.yaml"
+    src: dashboard-deployment.yaml
+    dest: "{{ kubernetes_addons_dir }}/dashboard-deployment.yaml"
   tags:
     - addons
     - dashboard
@@ -18,13 +18,13 @@
     - addons
     - dashboard
 
-- name: Create dashboard replication controller
+- name: Create dashboard deployment
   become: yes
   kube:
-    resource: rc
+    resource: deployment
     name: kubernetes-dashboard
     namespace: kube-system
-    filename: "{{ kubernetes_addons_dir }}/dashboard-rc.yaml"
+    filename: "{{ kubernetes_addons_dir }}/dashboard-deployment.yaml"
     state: present
   tags:
     - addons
