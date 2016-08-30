@@ -11,8 +11,6 @@
     mode: 0755
   with_items:
     - "{{ kubernetes_config_dir }}"
-    - "{{ kubernetes_script_dir }}"
-    - "{{ kubernetes_podmaster_dir }}"
     - "{{ kubernetes_addons_dir }}"
   become: yes
   tags:
