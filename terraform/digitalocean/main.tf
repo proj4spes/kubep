@@ -9,12 +9,7 @@ variable "worker_instance_type" { default = "512mb" }
 variable "edge-router_instance_type" { default = "512mb" }
 variable "etcd_discovery_url_file" { default = "etcd_discovery_url.txt" }
 
-/*
-  we need to use at least beta because we need rkt version 0.15.0+ to run the
-  kubelet wrapper script.
-  See https://coreos.com/kubernetes/docs/latest/kubelet-wrapper.html
-*/
-variable "coreos_image" { default = "coreos-alpha" }
+variable "coreos_image" { default = "coreos-stable" }
 
 # Provider
 provider "digitalocean" {
