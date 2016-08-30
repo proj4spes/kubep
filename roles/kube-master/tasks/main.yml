@@ -79,12 +79,10 @@
       dest: "{{ kubernetes_manifest_dir }}/kube-proxy.yaml"
     - src: kube-apiserver.yaml.j2
       dest: "{{ kubernetes_manifest_dir }}/kube-apiserver.yaml"
-    - src: kube-podmaster.yaml.j2
-      dest: "{{ kubernetes_manifest_dir }}/kube-podmaster.yaml"
     - src: kube-controller-manager.yaml.j2
-      dest: "{{ kubernetes_podmaster_dir }}/kube-controller-manager.yaml"
+      dest: "{{ kubernetes_manifest_dir }}/kube-controller-manager.yaml"
     - src: kube-scheduler.yaml.j2
-      dest: "{{ kubernetes_podmaster_dir }}/kube-scheduler.yaml"
+      dest: "{{ kubernetes_manifest_dir }}/kube-scheduler.yaml"
     - src: master-kubeconfig.j2
       dest: "{{ kubernetes_config_dir }}/master-kubeconfig"
   notify:
