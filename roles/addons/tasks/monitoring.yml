@@ -4,7 +4,7 @@
 - name: create heapster-controller file
   become: yes
   template:
-    src: heapster-controller.yml.j2
+    src: heapster-controller.yaml.j2
     dest: "{{ kubernetes_addons_dir }}/heapster-controller.yaml"
   tags:
     - addons
