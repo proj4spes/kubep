@@ -29,8 +29,8 @@
 - include: "{{ ingress_controller }}.yml"
   when: is_first_master|bool
 
-#- include: logging.yml
-#  when: enable_logging and is_first_master|bool
+- include: logging.yml
+  when: enable_logging and is_first_master|bool
 
 #- include: registry.yml
 #  when: setup_docker_registry and is_first_master|bool
