@@ -1,0 +1,109 @@
+---
+
+# heapster
+- name: create heapster-controller file
+  become: yes
+  template:
+    src: heapster-controller.yaml.j2
+    dest: "{{ kubernetes_addons_dir }}/heapster-controller.yaml"
+  tags:
+    - addons
+    - monitoring
+
+- name: Create heapster-controller
+  become: yes
+  kube:
+    resource: rc
+    name: heapster-controller
+    namespace: kube-system
+    filename: "{{ kubernetes_addons_dir }}/heapster-controller.yaml"
+    state: present
+  tags:
+    - addons
+    - monitoring
+
+- name: create heapster-service file
+  become: yes
+  copy:
+    src: heapster-service.yaml
+    dest: "{{ kubernetes_addons_dir }}/heapster-service.yaml"
+  tags:
+    - addons
+    - monitoring
+
+- name: Create heapster-service
+  become: yes
+  kube:
+    resource: svc
+    name: heapster-service
+    namespace: kube-system
+    filename: "{{ kubernetes_addons_dir }}/heapster-service.yaml"
+    state: present
+  tags:
+    - addons
+    - monitoring
+
+# influxdb
+- name: create influxdb-grafana-controller file
+  become: yes
+  copy:
+    src: influxdb-grafana-controller.yaml
+    dest: "{{ kubernetes_addons_dir }}/influxdb-grafana-controller.yaml"
+  tags:
+    - addons
+    - monitoring
+
+- name: Create influxdb-grafana-controller
+  become: yes
+  kube:
+    resource: rc
+    name: influxdb-grafana-controller
+    namespace: kube-system
+    filename: "{{ kubernetes_addons_dir }}/influxdb-grafana-controller.yaml"
+    state: present
+  tags:
+    - addons
+    - monitoring
+
+- name: create influxdb-service file
+  become: yes
+  copy:
+    src: influxdb-service.yaml
+    dest: "{{ kubernetes_addons_dir }}/influxdb-service.yaml"
+  tags:
+    - addons
+    - monitoring
+
+- name: Create influxdb-service
+  become: yes
+  kube:
+    resource: svc
+    name: influxdb-service
+    namespace: kube-system
+    filename: "{{ kubernetes_addons_dir }}/influxdb-service.yaml"
+    state: present
+  tags:
+    - addons
+    - monitoring
+
+# Grafana
+- name: create grafana-service file
+  become: yes
+  copy:
+    src: grafana-service.yaml
+    dest: "{{ kubernetes_addons_dir }}/grafana-service.yaml"
+  tags:
+    - addons
+    - monitoring
+
+- name: Create grafana-service
+  become: yes
+  kube:
+    resource: svc
+    name: grafana-service
+    namespace: kube-system
+    filename: "{{ kubernetes_addons_dir }}/grafana-service.yaml"
+    state: present
+  tags:
+    - addons
+    - monitoring
