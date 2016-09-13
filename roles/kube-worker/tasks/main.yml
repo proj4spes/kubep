@@ -11,6 +11,7 @@
     mode: 0755
   with_items:
     - "{{ kubernetes_config_dir }}"
+    - "{{ kubernetes_cni_dir }}"
   become: yes
   tags:
     - kube-worker
@@ -58,5 +59,12 @@
       dest: "{{ kubernetes_config_dir }}/worker-kubeconfig"
     - src: kube-proxy.yaml.j2
       dest: "{{ kubernetes_manifest_dir }}/kube-proxy.yaml"
+    - src: "10-{{ network_plugin }}.conf.j2"
+      dest: "{{ kubernetes_cni_dir }}/10-{{ network_plugin }}.conf"
   tags:
+    - kube-worker
+
+- include: calico.yml
+  tags:
+    - calico
     - kube-worker

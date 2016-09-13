@@ -12,6 +12,8 @@
   with_items:
     - "{{ kubernetes_config_dir }}"
     - "{{ kubernetes_addons_dir }}"
+    - "{{ kubernetes_manifest_dir }}"
+    - "{{ kubernetes_cni_dir }}"
   become: yes
   tags:
     - kube-master
@@ -83,9 +85,14 @@
       dest: "{{ kubernetes_manifest_dir }}/kube-scheduler.yaml"
     - src: master-kubeconfig.j2
       dest: "{{ kubernetes_config_dir }}/master-kubeconfig"
+    - src: policy-controller.yaml.j2
+      dest: "{{ kubernetes_manifest_dir }}/policy-controller.yaml"
+    - src: "10-{{ network_plugin }}.conf.j2"
+      dest: "{{ kubernetes_cni_dir }}/10-{{ network_plugin }}.conf"
   notify:
     - reload systemd
     - restart kubelet
+    - restart calico-node
   tags:
     - kube-master
 
@@ -93,4 +100,9 @@
   wait_for:
     port: 8080
   tags:
+    - kube-master
+
+- include: calico.yml
+  tags:
+    - calico
     - kube-master

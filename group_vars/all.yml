@@ -74,9 +74,19 @@ kubernetes_cert_dir: "{{ kubernetes_config_dir }}/ssl"
 kubernetes_manifest_dir: "{{ kubernetes_config_dir }}/manifests"
 kubernetes_addons_dir: "{{ kubernetes_config_dir }}/addons"
 kubernetes_users_dir: "{{ kubernetes_config_dir }}/users"
+kubernetes_cni_dir: "{{ kubernetes_config_dir }}/cni/net.d"
+
+# Network CNI plugin to use. Supported:
+# - Calico
+# - Weave
+# - Romana - Coming soon...
+# - OpenContrail - Coming soon...
+network_plugin: 'calico'
 
 # Whether to enable the kubernetes-dashboard
 enable_dashboard: true
+enable_logging: false
+enable_monitoring: false
 
 # DNS domain for SkyDNS + Kubelet
 dns_domain: cluster.local
