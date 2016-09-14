@@ -6,9 +6,11 @@
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: traefik-ingress-controller
+  name: traefik-ingress-controller-v1
+  namespace: kube-system
   labels:
     k8s-app: traefik-ingress-lb
+    kubernetes.io/cluster-service: "true"
 spec:
   template:
     metadata:

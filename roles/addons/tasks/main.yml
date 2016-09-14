@@ -1,25 +1,4 @@
 ---
-- name: create kube-system namespace file
-  become: yes
-  copy:
-    src: kube-system.yaml
-    dest: "{{ kubernetes_addons_dir }}/kube-system.yaml"
-  tags:
-    - addons
-    - kubernetes
-
-- name: Create kube-system namespace
-  become: yes
-  kube:
-    resource: namespace
-    name: kube-system
-    filename: "{{ kubernetes_addons_dir }}/kube-system.yaml"
-    state: present
-  run_once: true
-  tags:
-    - addons
-    - kubernetes
-
 - include: skydns.yml
   when: is_first_master|bool
 
@@ -38,4 +17,14 @@
 #- include: registry.yml
 #  when: setup_docker_registry and is_first_master|bool
 
-
+- name: Create addons
+  run_once: true
+  become: yes
+  kube:
+    filename: "{{ kubernetes_addons_dir }}"
+    state: present
+  run_once: true
+  tags:
+    - addons
+    - kubernetes
+    - create-addons

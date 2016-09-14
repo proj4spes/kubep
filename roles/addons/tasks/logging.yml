@@ -8,18 +8,6 @@
     - addons
     - logging
 
-- name: Create fluentd-logging daemonSet
-  become: yes
-  kube:
-    resource: daemonSet
-    name: fluentd-logging-ds
-    namespace: kube-system
-    filename: "{{ kubernetes_addons_dir }}/fluentd-logging-ds.yaml"
-    state: present
-  tags:
-    - addons
-    - logging
-
 # Elasticsearch
 - name: create es-controller file
   become: yes
@@ -30,35 +18,11 @@
     - addons
     - logging
 
-- name: Create es-controller
-  become: yes
-  kube:
-    resource: rc
-    name: es-controller
-    namespace: kube-system
-    filename: "{{ kubernetes_addons_dir }}/es-controller.yaml"
-    state: present
-  tags:
-    - addons
-    - logging
-
 - name: create es-service file
   become: yes
   copy:
     src: es-service.yaml
     dest: "{{ kubernetes_addons_dir }}/es-service.yaml"
-  tags:
-    - addons
-    - logging
-
-- name: Create es-service
-  become: yes
-  kube:
-    resource: svc
-    name: es-service
-    namespace: kube-system
-    filename: "{{ kubernetes_addons_dir }}/es-service.yaml"
-    state: present
   tags:
     - addons
     - logging
@@ -73,35 +37,11 @@
     - addons
     - logging
 
-- name: Create kibana-controller
-  become: yes
-  kube:
-    resource: rc
-    name: kibana-controller
-    namespace: kube-system
-    filename: "{{ kubernetes_addons_dir }}/kibana-controller.yaml"
-    state: present
-  tags:
-    - addons
-    - logging
-
 - name: create kibana-service file
   become: yes
   copy:
     src: kibana-service.yaml
     dest: "{{ kubernetes_addons_dir }}/kibana-service.yaml"
-  tags:
-    - addons
-    - logging
-
-- name: Create kibana-service
-  become: yes
-  kube:
-    resource: svc
-    name: kibana-service
-    namespace: kube-system
-    filename: "{{ kubernetes_addons_dir }}/kibana-service.yaml"
-    state: present
   tags:
     - addons
     - logging

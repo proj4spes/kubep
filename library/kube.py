@@ -114,7 +114,7 @@ class KubeManager(object):
             rc, out, err = self.module.run_command(args)
             if rc != 0:
                 self.module.fail_json(
-                    msg='error running kubectl (%s) command (rc=%d): %s' % (' '.join(args), rc, out or err))
+                    msg='error running kubectl (%s) command (rc=%d): %s' % (' '.join(args), rc, out + err))
         except Exception as exc:
             self.module.fail_json(
                 msg='error running kubectl (%s) command: %s' % (' '.join(args), str(exc)))
