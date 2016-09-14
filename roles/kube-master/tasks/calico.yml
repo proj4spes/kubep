@@ -29,15 +29,3 @@
   tags:
     - kube-master
     - kubernetes
-
-- name: Create calico-system namespace
-  become: yes
-  kube:
-    resource: namespace
-    name: calico-system
-    filename: "{{ kubernetes_addons_dir }}/calico-system.yaml"
-    state: present
-  run_once: true
-  tags:
-    - kube-master
-    - kubernetes
