@@ -134,7 +134,7 @@ module "igw" {
 
 # public subnets
 module "public_subnet" {
-  source = "github.com/terraform-community-modules/tf_aws_public_subnet"
+  source = "github.com/terraform-community-modules/tf_aws_public_subnet?ref=b7659c06cba6a545b83f569bc73560b266e6c9c1"
   name   = "public"
   cidrs  = "10.0.1.0/24,10.0.2.0/24,10.0.3.0/24"
   azs    = "${var.availability_zones}"
