@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: traefik-my-nginx
+  namespace: default
+spec:
+  rules:
+  - host: traefik-my-nginx.local
+    http:
+      paths:
+      - backend:
+          serviceName: my-nginx
+          servicePort: 80

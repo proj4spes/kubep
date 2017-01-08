@@ -67,7 +67,8 @@ kubernetes_dns_service_ip: 10.3.0.10
 # but we include it here for backwards compatibility in the stable/beta channels.
 # See https://coreos.com/kubernetes/docs/latest/kubelet-wrapper.html
 kubernetes_kubelet_wrapper: https://raw.githubusercontent.com/coreos/coreos-overlay/master/app-admin/kubelet-wrapper/files/kubelet-wrapper
-
+# kubernetes /opt/bin EP
+#kubernetes_opt_bin: /opt/bin
 # kubernetes config dirs (used by master and worker)
 kubernetes_config_dir: /etc/kubernetes
 kubernetes_cert_dir: "{{ kubernetes_config_dir }}/ssl"

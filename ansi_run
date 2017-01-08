@@ -1,0 +1,2 @@
+#!/bin/bash
+ansible-playbook -u core   --ssh-common-args="-i /home/enri/kubeform/terraform/aws/public-cloud/id_rsa -q" --inventory-file=inventory site.yml -e kube_apiserver_vip=$(cd /home/enri/kubeform/terraform/aws/public-cloud && terraform output master_elb_hostname)

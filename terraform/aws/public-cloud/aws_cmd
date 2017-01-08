@@ -1,0 +1,7 @@
+ aws iam list-instance-profiles
+ aws iam delete-instance-profile --instance-profile-name edge-router_profile
+ aws iam list-instance-profiles
+ aws iam delete-instance-profile --instance-profile-name worker_profile 
+ aws iam delete-instance-profile --instance-profile-name master_profile
+ aws iam list-instance-profiles
+

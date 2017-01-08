@@ -2,18 +2,20 @@ variable "access_key" {}
 variable "secret_key" {}
 variable "organization" { default = "kubeform" }
 variable "region" { default = "eu-west-1" }
+#variable "availability_zones" { default = ["eu-west-1a","eu-west-1b","eu-west-1c"] }
 variable "availability_zones" { default = "eu-west-1a,eu-west-1b,eu-west-1c" }
-variable "coreos_channel" { default = "alpha" }
+variable "coreos_channel" { default = "stable" }
 variable "etcd_discovery_url_file" { default = "etcd_discovery_url.txt" }
 variable "masters" { default = "3" }
-variable "master_instance_type" { default = "m3.medium" }
-variable "workers" { default = "1" }
-variable "worker_instance_type" { default = "m3.medium" }
-variable "worker_ebs_volume_size" { default = "30" }
+variable "master_instance_type" { default = "t2.micro" }
+variable "workers" { default = "3" }
+variable "worker_instance_type" { default = "t2.micro" }
+variable "worker_ebs_volume_size" { default = "8" }
 variable "edge-routers" { default = "1" }
-variable "edge-router_instance_type" { default = "m3.medium" }
-variable "edge-router_ebs_volume_size" { default = "30" }
+variable "edge-router_instance_type" { default = "t2.micro" }
+variable "edge-router_ebs_volume_size" { default = "8" }
 variable "vpc_cidr_block" { default = "10.0.0.0/16" }
+#variable "cidrs"  { default = [ "10.0.1.0/24","10.0.2.0/24","10.0.3.0/24"] }
 
 provider "aws" {
   access_key = "${var.access_key}"
@@ -51,7 +53,7 @@ module "aws-keypair" {
 
 # certificates
 module "ca" {
-  source            = "github.com/Capgemini/tf_tls/ca"
+  source            = "../tf_tls/ca"
   organization      = "${var.organization}"
   ca_count          = "${var.masters + var.workers + var.edge-routers}"
   deploy_ssh_hosts  = "${concat(aws_instance.edge-router.*.public_ip, concat(aws_instance.master.*.public_ip, aws_instance.worker.*.public_ip))}"
@@ -60,17 +62,18 @@ module "ca" {
 }
 
 module "etcd_cert" {
-  source             = "github.com/Capgemini/tf_tls/etcd"
+  source             = "../tf_tls/etcd"
   ca_cert_pem        = "${module.ca.ca_cert_pem}"
   ca_private_key_pem = "${module.ca.ca_private_key_pem}"
 }
 
 module "kube_master_certs" {
-  source                = "github.com/Capgemini/tf_tls/kubernetes/master"
+  source                = "../tf_tls/kubernetes/master"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   ip_addresses          = "${concat(aws_instance.master.*.private_ip, aws_instance.master.*.public_ip)}"
-  dns_names             = "${compact(module.master_elb.elb_dns_name)}"
+  #dns_names             = "${compact(module.master_elb.elb_dns_name)}"
+  dns_names             = ["${module.master_elb.elb_dns_name}" , ""]
   deploy_ssh_hosts      = "${compact(aws_instance.master.*.public_ip)}"
   master_count          = "${var.masters}"
   validity_period_hours = "8760"
@@ -80,7 +83,7 @@ module "kube_master_certs" {
 }
 
 module "kube_kubelet_certs" {
-  source                = "github.com/Capgemini/tf_tls/kubernetes/kubelet"
+  source                = "../tf_tls/kubernetes/kubelet"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   ip_addresses          = "${concat(aws_instance.edge-router.*.private_ip, concat(aws_instance.master.*.private_ip, aws_instance.worker.*.private_ip))}"
@@ -93,14 +96,14 @@ module "kube_kubelet_certs" {
 }
 
 module "kube_admin_cert" {
-  source                = "github.com/Capgemini/tf_tls/kubernetes/admin"
+  source                = "../tf_tls/kubernetes/admin"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   kubectl_server_ip     = "${module.master_elb.elb_dns_name}"
 }
 
 module "docker_daemon_certs" {
-  source                = "github.com/Capgemini/tf_tls/docker/daemon"
+  source                = "../tf_tls/docker/daemon"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   ip_addresses_list     = "${concat(aws_instance.edge-router.*.private_ip, concat(aws_instance.master.*.private_ip, aws_instance.worker.*.private_ip))}"
@@ -113,7 +116,7 @@ module "docker_daemon_certs" {
 }
 
 module "docker_client_certs" {
-  source                = "github.com/Capgemini/tf_tls/docker/client"
+  source                = "../tf_tls/docker/client"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   ip_addresses_list     = "${concat(aws_instance.edge-router.*.private_ip, concat(aws_instance.master.*.private_ip, aws_instance.worker.*.private_ip))}"
@@ -135,7 +138,9 @@ module "igw" {
 # public subnets
 module "public_subnet" {
   source = "github.com/terraform-community-modules/tf_aws_public_subnet?ref=b7659c06cba6a545b83f569bc73560b266e6c9c1"
+  #source = "github.com/terraform-community-modules/tf_aws_public_subnet"
   name   = "public"
+  #cidrs  = "${var.cidrs}"
   cidrs  = "10.0.1.0/24,10.0.2.0/24,10.0.3.0/24"
   azs    = "${var.availability_zones}"
   vpc_id = "${aws_vpc.default.id}"
